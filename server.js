@@ -31,7 +31,7 @@ app.post('/api/wallet/create', (req, res) => {
       pinCode || crypto.randomInt(0, 1000000).toString().padStart(6, '0'),
       initialBalance || 0,
     );
-    const { pinCodeHash, seedPhrase, ...safeWallet } = wallet;
+    const { pinCodeHash, ...safeWallet } = wallet;
     res.json({
       ok: true,
       wallet: safeWallet,
