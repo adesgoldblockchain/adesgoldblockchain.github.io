@@ -1,0 +1,64 @@
+[package]
+name = "adesgold"
+version = "0.1.0-alpha.0"
+edition = "2021"
+description = "AdesGold blockchain: P2P network with Proof-of-Download consensus and post-quantum privacy"
+license = "MIT OR Apache-2.0"
+
+[lib]
+name = "adesgold"
+path = "src/lib.rs"
+
+[[bin]]
+name = "adesgold"
+path = "src/main.rs"
+
+[features]
+default = ["standard"]
+standard = []
+pqc = ["dep:pqcrypto-traits", "dep:pqcrypto-mldsa", "dep:pqcrypto-mlkem"]
+full_crypto = ["pqc"]
+
+[dependencies]
+# Serialization
+serde = { version = "1", features = ["derive"] }
+bincode = "1"
+hex = "0.4"
+base64 = "0.22"
+
+# Hashing
+sha3 = "0.10"
+sha2 = "0.10"
+blake3 = "1"
+
+# Crypto primitives
+rand = "0.8"
+rand_core = "0.6"
+ed25519-dalek = { version = "2", features = ["rand_core", "serde"] }
+x25519-dalek = { version = "3", features = ["static_secrets"] }
+hkdf = "0.12"
+aes-gcm = "0.10"
+
+# PQC (NIST-standardized ML-DSA and ML-KEM) — optional, enable with --features pqc
+pqcrypto-traits = { version = "0.3", optional = true }
+pqcrypto-mldsa = { version = "0.1", optional = true, features = ["serialization"] }
+pqcrypto-mlkem = { version = "0.1", optional = true, features = ["serialization"] }
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+dialoguer = "0.11"
+
+# Utilities
+thiserror = "1"
+chrono = { version = "0.4", features = ["serde"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Networking
+tokio = { version = "1", features = ["full"] }
+tokio-util = "0.7"
+futures = "0.3"
+serde_json = "1"
+
+[dev-dependencies]
+proptest = "1"
