@@ -1,0 +1,40 @@
+{
+  "name": "adesgold-wallet",
+  "version": "1.0.0",
+  "description": "Shared AdesGold wallet SDK for TAKTAK, Tudominioweb3ahora, and AdesGold blockchain",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "homepage": "https://adesgold.github.io/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AdesGold/AdesGold.github.io.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AdesGold/AdesGold.github.io/issues"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test dist/",
+    "test:api": "node server.js"
+  },
+  "keywords": [
+    "adesgold",
+    "wallet",
+    "blockchain",
+    "crypto",
+    "taktak",
+    "tudominioweb3"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}
