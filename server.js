@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const crypto = require('node:crypto');
-const { AdesGoldWallet, ADES_GOLD } = require('./dist/index.js');
+const { AdesGoldWallet, ADES_GOLD, QuantumCall } = require('./dist/index.js');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -214,12 +214,79 @@ app.get('/api/blockchain/info', (req, res) => {
   }
 });
 
+// ========== QuantumCall Endpoints ==========
+
+app.post('/api/call/initiate', (req, res) => {
+  try {
+    const { callerAddress, calleeAddress, type, transport } = req.body;
+    const quantumCall = new QuantumCall();
+    quantumCall.bindWallet(callerAddress);
+    const session = quantumCall.initiateCall(calleeAddress, type, transport);
+    if (!session) {
+      return res.status(400).json({ ok: false, error: 'No se pudo iniciar la llamada' });
+    }
+    res.json({ ok: true, session });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
+app.post('/api/call/answer', (req, res) => {
+  try {
+    const { callId, calleeAddress } = req.body;
+    const quantumCall = new QuantumCall();
+    quantumCall.bindWallet(calleeAddress);
+    const session = quantumCall.answerCall(callId);
+    if (!session) {
+      return res.status(400).json({ ok: false, error: 'No se pudo responder la llamada' });
+    }
+    res.json({ ok: true, session });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
+app.post('/api/call/end', (req, res) => {
+  try {
+    const { callId } = req.body;
+    const quantumCall = new QuantumCall();
+    const session = quantumCall.endCall(callId);
+    if (!session) {
+      return res.status(400).json({ ok: false, error: 'No se pudo finalizar la llamada' });
+    }
+    res.json({ ok: true, session });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
+app.get('/api/call/history', (req, res) => {
+  try {
+    const quantumCall = new QuantumCall();
+    const history = quantumCall.getCallHistory();
+    res.json({ calls: history });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
+app.get('/api/call/security', (req, res) => {
+  try {
+    const quantumCall = new QuantumCall();
+    const security = quantumCall.getSecurityStatus();
+    res.json(security);
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
 const server = app.listen(PORT, () => {
   console.log(`\n=========================================`);
   console.log(`⛓️ AdesGold Wallet API corriendo en puerto ${PORT}`);
   console.log(`🔗 Health: http://localhost:${PORT}/health`);
   console.log(`💎 Wallet API: http://localhost:${PORT}/api/wallet`);
   console.log(`⛓️ Blockchain Info: http://localhost:${PORT}/api/blockchain/info`);
+  console.log(`📞 QuantumCall API: http://localhost:${PORT}/api/call`);
   console.log(`=========================================\n`);
 });
 
