@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AdesGold - Blockchain Post-Cuántica con PoDT</title>
+  <meta name="description" content="AdesGold: Blockchain soberana con consenso PoDT y privacidad post-cuántica. Token nativo ADG." />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0a0a1a;
+      color: #e8e8f0;
+      line-height: 1.6;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+    header {
+      background: linear-gradient(135deg, #00d4ff 0%, #0080ff 100%);
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2.5rem;
+      color: #000;
+      font-weight: 800;
+    }
+    header p { color: #003366; font-size: 1.1rem; margin-top: 0.5rem; }
+    .hero {
+      background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
+      padding: 4rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid #222;
+    }
+    .hero h2 { font-size: 1.8rem; margin-bottom: 1rem; color: #00d4ff; }
+    .hero p { font-size: 1.1rem; max-width: 800px; margin: 0 auto; color: #c0c0d0; }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      padding: 3rem 2rem;
+    }
+    .feature-card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 212, 255, 0.15);
+    }
+    .feature-card h3 {
+      color: #00d4ff;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+    .feature-card p { color: #a8a8c0; font-size: 0.95rem; }
+    .tech-stack {
+      background: #111;
+      padding: 2rem;
+      border-radius: 12px;
+      margin: 2rem 0;
+    }
+    .tech-stack h3 { color: #00d4ff; margin-bottom: 1rem; }
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .tech-tag {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: #88c0ff;
+    }
+    .wallet-section {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin: 2rem 0;
+    }
+    .wallet-section h2 {
+      color: #38bdf8;
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .wallet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .wallet-card {
+      background: #1e293b;
+      border: 1px solid #475569;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .wallet-card h4 {
+      color: #7dd3fc;
+      margin-bottom: 0.75rem;
+      font-size: 1.1rem;
+    }
+    .wallet-card .balance {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fbbf24;
+      margin-bottom: 0.5rem;
+    }
+    .wallet-card .address {
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      word-break: break-all;
+    }
+    .wallet-card button {
+      margin-top: 1rem;
+      width: 100%;
+      padding: 0.6rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .wallet-card button:hover { opacity: 0.9; }
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .stat-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat-box .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 0.25rem;
+    }
+    .stat-box .value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #38bdf8;
+    }
+    .interactive-panel {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin: 2rem 0;
+    }
+    .interactive-panel h2 {
+      color: #38bdf8;
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: 1rem;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #00d4ff;
+    }
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary {
+      background: linear-gradient(135deg, #475569 0%, #334155 100%);
+    }
+    .result-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      color: #38bdf8;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+    .status-online { background: #00c853; }
+    .status-offline { background: #ff2d55; }
+    .status-checking { background: #fbbf24; }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: #666;
+      border-top: 1px solid #222;
+      font-size: 0.85rem;
+    }
+    footer a { color: #00d4ff; text-decoration: none; font-weight: 600; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AdesGold Blockchain</h1>
+    <p>Blockchain Soberana con Consenso PoDT y Privacidad Post-Cuántica</p>
+    <p style="margin-top: 0.5rem; font-size: 0.9rem;">Token nativo: ADG | Suministro total: 100,000,000</p>
+  </header>
+
+  <section class="hero">
+    <h2>La blockchain del futuro con resistencia cuántica</h2>
+    <p>
+      AdesGold implementa el <strong>consenso PoDT (Proof of Digital Trust)</strong>, un algoritmo de consenso
+      basado en puntuaciones de confianza y reputación de validadores. Combinado con criptografía
+      <strong>post-cuántica</strong> (firmas XMSS-SHA2) y <strong>privacidad avanzada</strong> (direcciones
+      stealth, transacciones confidenciales y firmas anónimas), AdesGold ofrece una red blockchain segura
+      contra amenazas cuánticas futuras.
+    </p>
+  </section>
+
+  <section class="features">
+    <div class="feature-card">
+      <h3>🔐 Criptografía Post-Cuántica</h3>
+      <p>Firmas digitales XMSS-SHA2-256, intercambio de claves KEM y encriptación AES-256-GCM.
+      Todo resistente a ataques de computadoras cuánticas.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>⛓️ Consenso PoDT</h3>
+      <p>Proof of Digital Trust: selección de validadores basada en puntuaciones de confianza,
+      tolerancia a fallos bizantinos del 66.67% y slashing automático por mal comportamiento.</p>
+    </div>
+
+    <div class="feature-card">
+      <h3>🛡️ Privacidad Avanzada</h3>
+      <p>Direcciones stealth unidireccionales, transacciones confidenciales con pruebas de rango,
+      y firmas anónimas (ring signatures) para transacciones completamente opacas.</p>
+    </div>
+  </section>
+
+  <section class="wallet-section">
+    <h2>Wallets Activas - AdesGold</h2>
+    <div class="wallet-grid">
+      <div class="wallet-card">
+        <h4>Master Wallet</h4>
+        <div class="balance">30,000,000 ADG</div>
+        <div class="address">tudor1treasury000000000000000000000000q3k8la</div>
+        <button onclick="alert('Master Wallet: 30% del suministro total')">Ver Detalles</button>
+      </div>
+      <div class="wallet-card">
+        <h4>Ecosystem Wallet</h4>
+        <div class="balance">70,000,000 ADG</div>
+        <div class="address">tudor1ecosyste00000000000000000000000000000000ea</div>
+        <button onclick="alert('Ecosystem Wallet: 70% del suministro total')">Ver Detalles</button>
+      </div>
+      <div class="wallet-card">
+        <h4>Faucet Wallet</h4>
+        <div class="balance">1,000,000 ADG</div>
+        <div class="address">tudor1faucet000000000000000000000000007v3wep</div>
+        <button onclick="alert('Faucet Wallet: Fondos de prueba')">Ver Detalles</button>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="label">Suministro Total</div>
+        <div class="value">100,000,000</div>
+      </div>
+      <div class="stat-box">
+        <div class="label">Master Wallets</div>
+        <div class="value">30%</div>
+      </div>
+      <div class="stat-box">
+        <div class="label">Ecosistema</div>
+        <div class="value">70%</div>
+      </div>
+      <div class="stat-box">
+        <div class="label">Recompensa Minero</div>
+        <div class="value">49%</div>
+      </div>
+      <div class="stat-box">
+        <div class="label">Recompensa Tesoro</div>
+        <div class="value">51%</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="interactive-panel">
+    <h2>Probar Conexión - AdesGold API</h2>
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+      <span id="statusDot" class="status-dot status-checking"></span>
+      <span id="statusText">Verificando conexión con el API...</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+      <div>
+        <h3 style="color: #00d4ff; margin-bottom: 1rem; font-size: 1.1rem;">Crear Wallet</h3>
+        <form id="createWalletForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <input type="text" id="createUsername" placeholder="Usuario (3-20 caracteres)" required minlength="3" maxlength="20" />
+          <input type="text" id="createPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" />
+          <button type="submit" class="btn" id="createWalletBtn">Crear Wallet</button>
+        </form>
+      </div>
+
+      <div>
+        <h3 style="color: #00d4ff; margin-bottom: 1rem; font-size: 1.1rem;">Consultar Balance</h3>
+        <form id="balanceForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <input type="text" id="balanceAddress" placeholder="Dirección de wallet" required />
+          <button type="submit" class="btn" id="balanceBtn">Consultar Balance</button>
+        </form>
+      </div>
+
+      <div>
+        <h3 style="color: #00d4ff; margin-bottom: 1rem; font-size: 1.1rem;">Enviar ADG</h3>
+        <form id="sendForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <input type="text" id="sendFrom" placeholder="Tu dirección" required />
+          <input type="text" id="sendTo" placeholder="Dirección destino" required />
+          <input type="number" id="sendAmount" placeholder="Cantidad ADG" required min="0" step="0.01" />
+          <button type="submit" class="btn" id="sendBtn">Enviar</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="resultBox" class="result-box" style="display: none;"></div>
+  </section>
+
+  <section class="container">
+    <div class="tech-stack">
+      <h3>Tecnologías</h3>
+      <div class="tech-tags">
+        <span class="tech-tag">TypeScript</span>
+        <span class="tech-tag">Node.js Crypto</span>
+        <span class="tech-tag">XMSS-SHA2-256</span>
+        <span class="tech-tag">SHA-256</span>
+        <span class="tech-tag">HMAC-SHA256</span>
+        <span class="tech-tag">AES-256-GCM</span>
+        <span class="tech-tag">Pedersen Commitments</span>
+        <span class="tech-tag">Ring Signatures</span>
+      </div>
+    </div>
+
+    <div class="tech-stack">
+      <h3>Arquitectura del SDK</h3>
+      <p style="color: #a8a8c0; margin-bottom: 1rem;">
+        El SDK de AdesGold Wallet proporciona las siguientes clases y módulos:
+      </p>
+      <div class="tech-tags">
+        <span class="tech-tag">AdesGoldWallet (wallet principal)</span>
+        <span class="tech-tag">PQCrypto (criptografía post-cuántica)</span>
+        <span class="tech-tag">PoDTConsensus (consenso PoDT)</span>
+        <span class="tech-tag">PrivacyManager (funciones de privacidad)</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>AdesGold Blockchain &copy; 2026 | PoDT Consensus + Post-Quantum Privacy</p>
+    <p style="margin-top: 0.5rem;">Suministro total: 100,000,000 ADG | 30% Cuentas Maestra | 70% Ecosistema</p>
+  </footer>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const API_BASE = urlParams.get('api') || window.location.origin;
+
+    function showResult(data, isError = false) {
+      const box = document.getElementById('resultBox');
+      box.style.display = 'block';
+      box.style.borderColor = isError ? '#ff2d55' : '#334155';
+      box.style.color = isError ? '#ff8a8a' : '#38bdf8';
+      box.textContent = JSON.stringify(data, null, 2);
+    }
+
+    function hideResult() {
+      document.getElementById('resultBox').style.display = 'none';
+    }
+
+    async function checkApiHealth() {
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('statusText');
+      try {
+        const res = await fetch(`${API_BASE}/health`);
+        if (res.ok) {
+          dot.className = 'status-dot status-online';
+          text.textContent = 'Conectado a AdesGold API';
+        } else {
+          throw new Error('API no disponible');
+        }
+      } catch (err) {
+        dot.className = 'status-dot status-offline';
+        text.textContent = 'Sin conexión al API. Inicia el servidor con: npm start';
+      }
+    }
+
+    document.getElementById('createWalletForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideResult();
+      const btn = document.getElementById('createWalletBtn');
+      btn.disabled = true;
+      btn.textContent = 'Creando...';
+      try {
+        const username = document.getElementById('createUsername').value;
+        const pinCode = document.getElementById('createPin').value;
+        const res = await fetch(`${API_BASE}/api/wallet/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, pinCode }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al crear wallet');
+        showResult(data);
+        alert('Wallet creada. Guarda tu frase semilla.');
+      } catch (err) {
+        showResult({ error: err.message }, true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Crear Wallet';
+      }
+    });
+
+    document.getElementById('balanceForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideResult();
+      const btn = document.getElementById('balanceBtn');
+      btn.disabled = true;
+      btn.textContent = 'Consultando...';
+      try {
+        const address = document.getElementById('balanceAddress').value;
+        const res = await fetch(`${API_BASE}/api/wallet/balance/${address}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al consultar balance');
+        showResult(data);
+      } catch (err) {
+        showResult({ error: err.message }, true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Consultar Balance';
+      }
+    });
+
+    document.getElementById('sendForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideResult();
+      const btn = document.getElementById('sendBtn');
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+      try {
+        const sender = document.getElementById('sendFrom').value;
+        const recipient = document.getElementById('sendTo').value;
+        const amount = parseFloat(document.getElementById('sendAmount').value);
+        const res = await fetch(`${API_BASE}/api/wallet/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sender, recipient, amount, denom: 'ADG' }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al enviar');
+        showResult(data);
+      } catch (err) {
+        showResult({ error: err.message }, true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Enviar';
+      }
+    });
+
+    checkApiHealth();
+  </script>
+</body>
+</html>
