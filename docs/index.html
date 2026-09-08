@@ -507,8 +507,11 @@
       <span id="statusText">Verificando conexión con el API...</span>
     </div>
 
-    <div id="walletPanel" style="display: none;">
-      <div style="text-align: center; padding: 20px 0;">
+     <div id="walletPanel" style="display: none;">
+      <div style="text-align: center; padding: 20px 20px 0;">
+        <div style="display: flex; justify-content: flex-end;">
+          <button id="logoutBtnPanel" class="btn" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); padding: 8px 12px; font-size: 0.8rem;">Cerrar sesión</button>
+        </div>
         <div id="walletAvatar" style="font-size: 64px; margin-bottom: 12px;">👤</div>
         <h3 id="walletUsername" style="color: #e2e8f0; font-size: 20px; font-weight: 800; margin-bottom: 4px;"></h3>
         <p id="walletAddress" style="color: #64748b; font-size: 12px; font-family: monospace; word-break: break-all; padding: 0 20px;"></p>
@@ -1072,12 +1075,22 @@
       showLanding();
     });
 
+    const logoutPanelBtn = document.getElementById('logoutBtnPanel');
+    if (logoutPanelBtn) {
+      logoutPanelBtn.addEventListener('click', () => {
+        lockSession();
+        showLanding();
+      });
+    }
+
     function showWalletPanel(wallet, isAuto = false) {
       document.getElementById('authForms').style.display = 'none';
       document.getElementById('authArea').style.display = 'none';
       document.getElementById('publicHero').style.display = 'none';
       const panel = document.getElementById('walletPanel');
       panel.style.display = 'block';
+      const sessionPanel = document.getElementById('sessionPanel');
+      if (sessionPanel) sessionPanel.style.display = 'flex';
       document.getElementById('walletUsername').textContent = wallet.username || 'Usuario';
       document.getElementById('walletAddress').textContent = wallet.address || wallet.walletAddress || '';
       document.getElementById('walletBalance').textContent = wallet.balance ?? 0;
