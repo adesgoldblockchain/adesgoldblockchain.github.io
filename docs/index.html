@@ -768,6 +768,9 @@
     let sessionStart = 0;
 
     function saveSession(wallet) {
+      // SEGURIDAD: localStorage es accesible por cualquier script del mismo origen.
+      // Si el dispositivo está comprometido o hay XSS, la frase de recuperación puede leakearse.
+      // Para mitigar: no usar en entornos compartidos, preferir sesiones server-side con token efímero.
       const payload = {
         username: wallet.username,
         address: wallet.address || wallet.walletAddress,
@@ -1129,6 +1132,53 @@
     }
 
     checkApiHealth();
+
+    (function antiTamper() {
+      const SESSION_KEY = 'adesgold_session_v1';
+      function clearSensitiveData() {
+        try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+        try { sessionStorage.clear(); } catch (e) {}
+      }
+      function lockAndWipe() {
+        clearSensitiveData();
+        const panel = document.getElementById('walletPanel');
+        const auth = document.getElementById('authForms');
+        if (panel) panel.style.display = 'none';
+        if (auth) auth.style.display = 'flex';
+        const forms = document.querySelectorAll('#createWalletForm, #loginForm, #seedPhrasePanel');
+        forms.forEach((el) => { if (el) el.style.display = 'none'; });
+        const c = document.createElement('div');
+        c.style.cssText = 'position:fixed;inset:0;background:#000;color:#ef4444;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;text-align:center;padding:20px;';
+        c.innerHTML = '<div><h1>Acceso bloqueado</h1><p>Se detectó manipulación del navegador. Por seguridad se cerró la sesión.</p></div>';
+        document.body.appendChild(c);
+      }
+      window.addEventListener('contextmenu', (e) => e.preventDefault());
+      window.addEventListener('keydown', (e) => {
+        const k = e.key.toLowerCase();
+        if (k === 'f12' || (e.ctrlKey && k === 'u') || (e.ctrlKey && k === 's') || (e.ctrlKey && k === 'p') || (e.ctrlKey && k === 'shift' && k === 'i')) {
+          e.preventDefault();
+          lockAndWipe();
+        }
+      });
+      const detectDevtools = () => {
+        const threshold = 160;
+        if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
+          lockAndWipe();
+        }
+      };
+      window.addEventListener('resize', detectDevtools);
+      setInterval(detectDevtools, 1000);
+      setInterval(() => {
+        try {
+          const forms = document.querySelectorAll('#createWalletForm, #loginForm');
+          const missing = Array.from(forms).some((el) => !el.isConnected);
+          if (missing) lockAndWipe();
+        } catch (e) {
+          lockAndWipe();
+        }
+      }, 1500);
+      window.addEventListener('beforeunload', clearSensitiveData);
+    })();
 
     // QuantumCall integration
     async function loadCallSecurity() {
