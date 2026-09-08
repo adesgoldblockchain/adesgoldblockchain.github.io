@@ -651,7 +651,7 @@
       btn.innerHTML = '<span style="font-size: 24px;">⛏️</span><span style="font-size: 11px; font-weight: 700;">Minando...</span>';
       const status = document.getElementById('miningStatus');
       const result = document.getElementById('miningResult');
-      if (status) { status.style.display = 'block'; status.textContent = 'Buscando nonce válido...'; }
+      if (status) { status.style.display = 'block'; status.textContent = 'Buscando nonce válido...'; status.style.color = '#38bdf8'; }
       if (result) { result.style.display = 'none'; }
       try {
         const sender = document.getElementById('walletAddress').textContent;
@@ -662,16 +662,15 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al minar');
-        const block = data.result && data.result.block ? data.result.block : data.block || data;
-        const header = block.header || block;
+        const mined = data.result || data;
         const lines = [
           `Estado: minado`,
-          `Block #: ${header.number ?? header.index ?? header.height ?? 'N/A'}`,
-          `Hash: ${header.hash || block.hash || 'N/A'}`,
-          `Minero: ${header.minerAddress || sender || 'N/A'}`,
-          `Recompensa: ${block.miningReward ?? data.miningReward ?? 'N/A'} ADG`,
-          `Txs: ${block.transactionCount ?? block.transactionIds?.length ?? (block.transactions ? block.transactions.length : 'N/A')}`,
-          `Timestamp: ${header.timestamp ? new Date(header.timestamp).toLocaleString() : (block.timestamp ? new Date(block.timestamp).toLocaleString() : 'N/A')}`,
+          `Block #: ${mined.blockNumber ?? 'N/A'}`,
+          `Hash: ${mined.nonce || mined.hash || 'N/A'}`,
+          `Minero: ${sender || 'N/A'}`,
+          `Recompensa: ${mined.reward ?? 'N/A'} ADG`,
+          `Txs: ${data.transactionCount ?? (data.transactions ? data.transactions.length : 'N/A')}`,
+          `Timestamp: ${new Date().toLocaleString()}`,
         ];
         if (result) {
           result.style.display = 'block';
@@ -679,9 +678,9 @@
         }
         if (status) { status.textContent = 'Minado exitoso'; status.style.color = '#34d399'; }
         const bal = document.getElementById('walletBalance');
-        if (bal && block.miningReward) {
+        if (bal && mined.reward) {
           const current = parseFloat(bal.textContent.replace(/,/g, '')) || 0;
-          bal.textContent = (current + Number(block.miningReward)).toLocaleString();
+          bal.textContent = (current + Number(mined.reward)).toLocaleString();
         }
       } catch (err) {
         const status = document.getElementById('miningStatus');
