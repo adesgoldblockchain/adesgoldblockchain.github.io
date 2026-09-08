@@ -689,8 +689,19 @@
     const urlParams = new URLSearchParams(window.location.search);
     const API_BASE = urlParams.get('api') || 'http://localhost:3001';
 
+    // Helper null-safe: devuelve el elemento o un objeto vacío con stub de style/classList
+    function $el(id) {
+      return document.getElementById(id) || {
+        style: {},
+        classList: { add: () => {}, remove: () => {} },
+        textContent: '',
+        innerHTML: ''
+      };
+    }
+
     function showResult(data, isError = false) {
       const box = document.getElementById('resultBox');
+      if (!box) return;
       box.style.display = 'block';
       box.style.borderColor = isError ? '#ff2d55' : '#334155';
       box.style.color = isError ? '#ff8a8a' : '#38bdf8';
@@ -698,12 +709,14 @@
     }
 
     function hideResult() {
-      document.getElementById('resultBox').style.display = 'none';
+      const box = document.getElementById('resultBox');
+      if (box) box.style.display = 'none';
     }
 
     function toggleCommissions() {
       const detail = document.getElementById('commissionsDetail');
       const toggle = document.getElementById('commissionsToggle');
+      if (!detail || !toggle) return;
       if (detail.style.display === 'none') {
         detail.style.display = 'block';
         toggle.textContent = '▼';
@@ -719,14 +732,14 @@
       try {
         const res = await fetch(`${API_BASE}/health`);
         if (res.ok) {
-          dot.className = 'status-dot status-online';
-          text.textContent = 'Conectado a AdesGold API';
+          if (dot) dot.className = 'status-dot status-online';
+          if (text) text.textContent = 'Conectado a AdesGold API';
         } else {
           throw new Error('API no disponible');
         }
       } catch (err) {
-        dot.className = 'status-dot status-offline';
-        text.textContent = 'Sin conexión al API. Inicia el servidor con: npm start';
+        if (dot) dot.className = 'status-dot status-offline';
+        if (text) text.textContent = 'Sin conexión al API. Inicia el servidor con: npm start';
       }
     }
 
