@@ -379,7 +379,7 @@
 
       <form id="loginForm" style="display: none; flex-direction: column; gap: 0.75rem;">
         <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Iniciar Sesión</h3>
-        <input type="text" id="loginSeedPhrase" placeholder="Frase semilla (12 palabras separadas por espacio)" required class="input-field" />
+        <input type="text" id="loginUsername" placeholder="Usuario" required class="input-field" />
         <input type="text" id="loginPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
         <button type="button" class="btn" id="loginBtn">Entrar</button>
       </form>
@@ -603,29 +603,6 @@
       </div>
     </div>
 
-    <div id="authForms">
-      <form id="createWalletForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
-        <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Crear Wallet Maestra</h3>
-        <input type="text" id="createUsername" placeholder="Usuario (3-20 caracteres)" required minlength="3" maxlength="20" class="input-field" />
-        <input type="text" id="createPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
-        <button type="submit" class="btn" id="createWalletBtn">Crear Wallet</button>
-      </form>
-
-      <form id="loginForm" style="display: none; flex-direction: column; gap: 0.75rem;">
-        <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Iniciar Sesión</h3>
-        <input type="text" id="loginSeedPhrase" placeholder="Frase semilla (12 palabras separadas por espacio)" required class="input-field" />
-        <input type="text" id="loginPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
-        <button type="button" class="btn" id="loginBtn">Entrar</button>
-      </form>
-    </div>
-
-    <div id="seedPhrasePanel" style="display: none; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 16px; margin-top: 12px;">
-      <h3 style="color: #fbbf24; margin-bottom: 10px; text-align: center;">🔐 Guarda tu frase de recuperación</h3>
-      <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin-bottom: 10px;">Anota estas 12 palabras en un lugar seguro. No las compartas.</p>
-      <div id="seedPhraseWords" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 12px;"></div>
-      <button type="button" class="btn" id="confirmSeedBtn" style="width: 100%;">Confirmar y continuar</button>
-    </div>
-
     <div id="resultBox" class="result-box" style="display: none;"></div>
 
     <div id="adesgoldCommissions" style="margin-top: 16px;">
@@ -819,8 +796,7 @@
       const payload = {
         username: wallet.username,
         address: wallet.address || wallet.walletAddress,
-        seedPhrase: wallet.seedPhrase,
-        pinCodeHash: wallet.pinCodeHash,
+        pinCode: wallet.pinCode,
         savedAt: Date.now(),
       };
       try { localStorage.setItem(SESSION_KEY, JSON.stringify(payload)); } catch (e) {}
@@ -964,13 +940,13 @@
         return false;
       }
       try {
-        const res = await fetch(`${API_BASE}/api/wallet/authenticate`, {
+        const res = await fetch(`${API_BASE}/api/wallet/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ seedPhrase: session.seedPhrase, pinCodeHash: session.pinCodeHash }),
+          body: JSON.stringify({ username: session.username, pinCode: session.pinCode }),
         });
         const data = await res.json();
-        if (res.ok && data.wallet) {
+        if (res.ok && data.wlet) {
           showWalletPanel(data.wallet, true);
           return true;
         }
@@ -978,43 +954,6 @@
       clearSession();
       showLanding();
       return false;
-    }
-
-    function showAuthView(view) {
-      const authArea = document.getElementById('authArea');
-      const publicHero = document.getElementById('publicHero');
-      const createForm = document.getElementById('createWalletForm');
-      const loginForm = document.getElementById('loginForm');
-      const recoverForm = document.getElementById('recoverForm');
-      const recoverReset = document.getElementById('recoverResetForm');
-      const seedPanel = document.getElementById('seedPhrasePanel');
-      if (publicHero) publicHero.style.display = 'none';
-      if (authArea) authArea.style.display = 'block';
-      if (seedPanel) seedPanel.style.display = 'none';
-      if (createForm) createForm.style.display = 'none';
-      if (loginForm) loginForm.style.display = 'none';
-      if (recoverForm) recoverForm.style.display = 'none';
-      if (recoverReset) recoverReset.style.display = 'none';
-      if (view === 'create' && createForm) createForm.style.display = 'flex';
-      if (view === 'login' && loginForm) loginForm.style.display = 'flex';
-      if (view === 'recover' && recoverForm) recoverForm.style.display = 'flex';
-    }
-
-    function showLanding() {
-      const authArea = document.getElementById('authArea');
-      const publicHero = document.getElementById('publicHero');
-      const createForm = document.getElementById('createWalletForm');
-      const loginForm = document.getElementById('loginForm');
-      const recoverForm = document.getElementById('recoverForm');
-      const recoverReset = document.getElementById('recoverResetForm');
-      const seedPanel = document.getElementById('seedPhrasePanel');
-      if (authArea) authArea.style.display = 'none';
-      if (publicHero) publicHero.style.display = 'block';
-      if (seedPanel) seedPanel.style.display = 'none';
-      if (createForm) createForm.style.display = 'flex';
-      if (loginForm) loginForm.style.display = 'none';
-      if (recoverForm) recoverForm.style.display = 'none';
-      if (recoverReset) recoverReset.style.display = 'none';
     }
 
     document.getElementById('createWalletForm').addEventListener('submit', async (e) => {
@@ -1055,42 +994,24 @@
     });
 
     document.getElementById('confirmSeedBtn').addEventListener('click', async () => {
-      const raw = document.getElementById('loginSeedPhrase')?.value?.trim();
-      const pin = document.getElementById('loginPin')?.value?.trim();
       document.getElementById('seedPhrasePanel').style.display = 'none';
-      if (raw && pin) {
-        const seedPhrase = raw.split(/\s+/);
-        try {
-          const res = await fetch(`${API_BASE}/api/wallet/authenticate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ seedPhrase, pinCode: pin }),
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Error al autenticar');
-          showWalletPanel(data.wallet);
-          return;
-        } catch (err) {
-          showResult({ error: err.message }, true);
-        }
-      }
       showAuthView('login');
     });
 
     document.getElementById('loginBtn').addEventListener('click', async () => {
-      const raw = document.getElementById('loginSeedPhrase').value.trim();
+      const username = document.getElementById('loginUsername').value.trim();
       const pin = document.getElementById('loginPin').value.trim();
-      if (!raw || !pin) return;
-      const seedPhrase = raw.split(/\s+/);
+      if (!username || !pin) return;
       try {
-        const res = await fetch(`${API_BASE}/api/wallet/authenticate`, {
+        const res = await fetch(`${API_BASE}/api/wallet/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ seedPhrase, pinCode: pin }),
+          body: JSON.stringify({ username, pinCode: pin }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Error al autenticar');
-        showWalletPanel(data.wallet);
+        if (!res.ok) throw new Error(data.error || 'Error al iniciar sesión');
+        const wallet = { ...data.wallet, pinCode: pin };
+        showWalletPanel(wallet);
       } catch (err) {
         showResult({ error: err.message }, true);
       }

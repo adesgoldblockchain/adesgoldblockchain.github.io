@@ -56,6 +56,27 @@ app.post('/api/wallet/authenticate', (req, res) => {
   }
 });
 
+app.post('/api/wallet/login', (req, res) => {
+  try {
+    const { username, pinCode } = req.body;
+    if (!username || !pinCode) {
+      return res.status(400).json({ ok: false, error: 'Usuario y PIN son requeridos' });
+    }
+    const wallet = adesGoldWallet.getWalletByUsername(username);
+    if (!wallet) {
+      return res.status(401).json({ ok: false, error: 'Usuario no encontrado' });
+    }
+    const pinHash = crypto.createHash('sha256').update(pinCode).digest('hex');
+    if (wallet.pinCodeHash !== pinHash) {
+      return res.status(401).json({ ok: false, error: 'PIN incorrecto' });
+    }
+    const { pinCodeHash, ...safeWallet } = wallet;
+    res.json({ ok: true, wallet: safeWallet });
+  } catch (err) {
+    res.status(401).json({ ok: false, error: err.message });
+  }
+});
+
 app.post('/api/wallet/recover', (req, res) => {
   try {
     const { seedPhrase, username, pinCode } = req.body;
