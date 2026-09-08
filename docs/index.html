@@ -510,12 +510,14 @@
 
      <div id="walletPanel" style="display: none;">
       <div style="text-align: center; padding: 20px 20px 0;">
-        <div style="display: flex; justify-content: flex-end;">
-          <button id="logoutBtnPanel" class="btn" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); padding: 8px 12px; font-size: 0.8rem;" onclick="lockSession(); showLanding();">Cerrar sesión</button>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+          <div style="text-align: left; flex: 1;">
+            <h3 id="walletUsername" style="color: #e2e8f0; font-size: 20px; font-weight: 800; margin-bottom: 4px;"></h3>
+            <p id="walletAddress" style="color: #64748b; font-size: 12px; font-family: monospace; word-break: break-all;"></p>
+          </div>
+          <button id="logoutBtnPanel" class="btn" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); padding: 8px 12px; font-size: 0.8rem; white-space: nowrap;" onclick="lockSession(); showLanding();">Cerrar sesión</button>
         </div>
         <div id="walletAvatar" style="font-size: 64px; margin-bottom: 12px;">👤</div>
-        <h3 id="walletUsername" style="color: #e2e8f0; font-size: 20px; font-weight: 800; margin-bottom: 4px;"></h3>
-        <p id="walletAddress" style="color: #64748b; font-size: 12px; font-family: monospace; word-break: break-all; padding: 0 20px;"></p>
         <div style="margin-top: 12px; padding: 12px 20px; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); border: 1px solid #3b82f6; border-radius: 16px; display: inline-block;">
           <div style="color: #94a3b8; font-size: 11px; margin-bottom: 4px;">Balance</div>
           <div id="walletBalance" style="color: #fbbf24; font-size: 32px; font-weight: 900;">0</div>
