@@ -84,16 +84,21 @@ app.post('/api/wallet/recover', (req, res) => {
       return res.status(400).json({ ok: false, error: 'Debes ingresar exactamente 12 palabras de recuperación' });
     }
     const existing = adesGoldWallet.getWalletBySeedPhrase(seedPhrase);
-    const wallet = adesGoldWallet.recoverWallet(seedPhrase, { username, pinCode });
-    const safeWallet = existing
-      ? (() => { const { pinCodeHash: _, seedPhrase: __, ...rest } = wallet; return rest; })()
-      : (() => { const { pinCodeHash: _, seedPhrase: __, ...rest } = wallet; return rest; })();
-    res.json({
-      ok: true,
-      wallet: safeWallet,
-      recovered: !!existing,
-      message: existing ? 'Cuenta recuperada y actualizada' : 'Cuenta creada desde frase de recuperación',
-    });
+    try {
+      const wallet = adesGoldWallet.recoverWallet(seedPhrase, { username, pinCode });
+      const safeWallet = existing
+        ? (() => { const { pinCodeHash: _, seedPhrase: __, ...rest } = wallet; return rest; })()
+        : (() => { const { pinCodeHash: _, seedPhrase: __, ...rest } = wallet; return rest; })();
+      res.json({
+        ok: true,
+        wallet: safeWallet,
+        recovered: !!existing,
+        message: existing ? 'Cuenta recuperada y actualizada' : 'Cuenta creada desde frase de recuperación',
+      });
+    } catch (walletError) {
+      console.error('Recover wallet error', walletError);
+      res.status(400).json({ ok: false, error: walletError.message || 'Error al recuperar wallet' });
+    }
   } catch (err) {
     res.status(400).json({ ok: false, error: err.message });
   }

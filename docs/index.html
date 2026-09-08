@@ -832,28 +832,41 @@
       const unlockInput = document.getElementById('secureUnlock');
       if (!overlay) return;
 
-      const hideOverlayFor = () => overlay.classList.remove('active');
-      const showOverlayAgain = () => {
-        if (!overlay.classList.contains('active')) activateSecureOverlay();
-      };
+      let overlayLocked = true;
+      const showOverlay = () => { overlayLocked = true; overlay.classList.add('active'); };
+      const hideOverlay = () => { overlayLocked = false; overlay.classList.remove('active'); };
 
       sensitiveIds.forEach((id) => {
         const el = document.getElementById(id);
         if (!el) return;
-        el.addEventListener('focus', hideOverlayFor);
-        el.addEventListener('blur', () => setTimeout(showOverlayAgain, 120));
+        el.addEventListener('focus', hideOverlay);
+      });
+
+      document.addEventListener('pointerdown', (e) => {
+        const target = e.target;
+        const isSensitive = !!sensitiveIds.find((id) => {
+          const el = document.getElementById(id);
+          return el && el.contains(target);
+        });
+        const isOverlay = overlay.contains(target);
+        if (!isSensitive && !isOverlay && overlayLocked) {
+          hideOverlay();
+        }
       });
 
       if (unlockBtn && unlockInput) {
         unlockBtn.addEventListener('click', () => {
           const pin = unlockInput.value.trim();
-          if (!pin) return hideOverlayFor();
+          if (!pin) return showOverlay();
           const stored = (() => { try { const raw = localStorage.getItem('adesgold_session_v1'); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } })();
-          if (stored && stored.pinCode && pin === stored.pinCode) return hideOverlayFor();
+          if (stored && stored.pinCode && pin === stored.pinCode) return hideOverlay();
           unlockInput.value = '';
           alert('PIN incorrecto');
+          showOverlay();
         });
       }
+
+      showOverlay();
     }
 
     setupSecureOverlay();
@@ -1055,8 +1068,22 @@
       btn.disabled = true;
       btn.textContent = 'Creando...';
       try {
-        const username = document.getElementById('createUsername').value;
-        const pinCode = document.getElementById('createPin').value;
+        let username = document.getElementById('createUsername').value.trim();
+        const pinCode = document.getElementById('createPin').value.trim();
+        if (!username || !pinCode) {
+          showResult({ error: 'Completa usuario y PIN' }, true);
+          return;
+        }
+        username = username.toLowerCase();
+        document.getElementById('createUsername').value = username;
+        if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+          showResult({ error: 'Usuario inválido. Usa solo letras minúsculas, números y guiones bajos, 3-20 caracteres.' }, true);
+          return;
+        }
+        if (!/^\d{6}$/.test(pinCode)) {
+          showResult({ error: 'PIN inválido. Debe ser un código numérico de 6 dígitos.' }, true);
+          return;
+        }
         const res = await fetch(`${API_BASE}/api/wallet/create`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1091,9 +1118,15 @@
     });
 
     document.getElementById('loginBtn').addEventListener('click', async () => {
-      const username = document.getElementById('loginUsername').value.trim();
+      let username = document.getElementById('loginUsername').value.trim();
       const pin = document.getElementById('loginPin').value.trim();
       if (!username || !pin) return;
+      username = username.toLowerCase();
+      document.getElementById('loginUsername').value = username;
+      if (!/^\d{6}$/.test(pin)) {
+        showResult({ error: 'PIN inválido. Debe ser un código numérico de 6 dígitos.' }, true);
+        return;
+      }
       try {
         const res = await fetch(`${API_BASE}/api/wallet/login`, {
           method: 'POST',
@@ -1138,10 +1171,20 @@
         showResult({ error: 'Sesión de recuperación inválida' }, true);
         return;
       }
-      const username = document.getElementById('recoverUsername').value.trim();
+      let username = document.getElementById('recoverUsername').value.trim();
       const pinCode = document.getElementById('recoverPin').value.trim();
       if (!username || !pinCode) {
         showResult({ error: 'Completa usuario y PIN' }, true);
+        return;
+      }
+      username = username.toLowerCase();
+      document.getElementById('recoverUsername').value = username;
+      if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+        showResult({ error: 'Usuario inválido. Usa solo letras minúsculas, números y guiones bajos, 3-20 caracteres.' }, true);
+        return;
+      }
+      if (!/^\d{6}$/.test(pinCode)) {
+        showResult({ error: 'PIN inválido. Debe ser un código numérico de 6 dígitos.' }, true);
         return;
       }
       try {
@@ -1151,7 +1194,10 @@
           body: JSON.stringify({ seedPhrase, username, pinCode }),
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Error al recuperar');
+        if (!res.ok) {
+          console.error('Recover error', res.status, data);
+          throw new Error(data.error || 'Error al recuperar');
+        }
         document.getElementById('recoverResetForm').style.display = 'none';
         showWalletPanel(data.wallet);
       } catch (err) {
