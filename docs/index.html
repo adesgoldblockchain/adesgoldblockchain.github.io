@@ -239,6 +239,16 @@
     }
     footer a { color: #00d4ff; text-decoration: none; font-weight: 600; }
     footer a:hover { text-decoration: underline; }
+    .input-field {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: 1rem;
+      outline: none;
+    }
   </style>
 </head>
 <body>
@@ -323,48 +333,198 @@
         <div class="value">51%</div>
       </div>
     </div>
-  </section>
+   </section>
 
-  <section class="interactive-panel">
-    <h2>Probar Conexión - AdesGold API</h2>
+   <div id="masterWalletCard" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); border: 1px solid #3b82f6; border-radius: 16px; padding: 16px 20px; margin-bottom: 1.5rem;">
+     <div style="display: flex; align-items: center; gap: 14px;">
+       <div style="font-size: 32px;">👑</div>
+       <div>
+         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+           <span style="font-weight: 800; color: #fbbf24;">📋 Cuenta Madre (Master Wallet)</span>
+           <span class="badge badge-green">Activa</span>
+         </div>
+         <div style="font-size: 0.85rem; color: #93c5fd; font-family: monospace;">Usuario: elidep</div>
+         <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+           🔐 Código PIN y 12 frases de recuperación → <span style="color: #34d399;">documentos seguros</span>
+         </div>
+       </div>
+     </div>
+   </div>
+
+   <section class="interactive-panel">
+    <h2>AdesGold Wallet</h2>
     <div style="text-align: center; margin-bottom: 1.5rem;">
       <span id="statusDot" class="status-dot status-checking"></span>
       <span id="statusText">Verificando conexión con el API...</span>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
-      <div>
-        <h3 style="color: #00d4ff; margin-bottom: 1rem; font-size: 1.1rem;">Crear Wallet</h3>
-        <form id="createWalletForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <input type="text" id="createUsername" placeholder="Usuario (3-20 caracteres)" required minlength="3" maxlength="20" />
-          <input type="text" id="createPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" />
-          <button type="submit" class="btn" id="createWalletBtn">Crear Wallet</button>
-        </form>
+    <div id="walletPanel" style="display: none;">
+      <div style="text-align: center; padding: 20px 0;">
+        <div id="walletAvatar" style="font-size: 64px; margin-bottom: 12px;">👤</div>
+        <h3 id="walletUsername" style="color: #e2e8f0; font-size: 20px; font-weight: 800; margin-bottom: 4px;"></h3>
+        <p id="walletAddress" style="color: #64748b; font-size: 12px; font-family: monospace; word-break: break-all; padding: 0 20px;"></p>
+        <div style="margin-top: 12px; padding: 12px 20px; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); border: 1px solid #3b82f6; border-radius: 16px; display: inline-block;">
+          <div style="color: #94a3b8; font-size: 11px; margin-bottom: 4px;">Balance</div>
+          <div id="walletBalance" style="color: #fbbf24; font-size: 32px; font-weight: 900;">0</div>
+          <div style="color: #60a5fa; font-size: 14px; font-weight: 700;">ADG</div>
+        </div>
       </div>
 
-      <div>
-        <h3 style="color: #00d4ff; margin-bottom: 1rem; font-size: 1.1rem;">Consultar Balance</h3>
-        <form id="balanceForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <input type="text" id="balanceAddress" placeholder="Dirección de wallet" required />
-          <button type="submit" class="btn" id="balanceBtn">Consultar Balance</button>
-        </form>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0;">
+        <button onclick="minarBloque()" class="btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+          <span style="font-size: 24px;">⛏️</span>
+          <span style="font-size: 11px; font-weight: 700;">Minar</span>
+        </button>
+        <button onclick="mostrarEnviar()" class="btn" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+          <span style="font-size: 24px;">📤</span>
+          <span style="font-size: 11px; font-weight: 700;">Enviar</span>
+        </button>
+        <button onclick="mostrarSwap()" class="btn" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+          <span style="font-size: 24px;">🔄</span>
+          <span style="font-size: 11px; font-weight: 700;">Swap</span>
+        </button>
       </div>
 
-      <div>
-        <h3 style="color: #00d4ff; margin-bottom: 1rem; font-size: 1.1rem;">Enviar ADG</h3>
-        <form id="sendForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <input type="text" id="sendFrom" placeholder="Tu dirección" required />
-          <input type="text" id="sendTo" placeholder="Dirección destino" required />
-          <input type="number" id="sendAmount" placeholder="Cantidad ADG" required min="0" step="0.01" />
-          <button type="submit" class="btn" id="sendBtn">Enviar</button>
-        </form>
+      <div id="sendForm" style="display: none; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 16px; margin-top: 12px;">
+        <h4 style="color: #60a5fa; font-size: 14px; margin-bottom: 12px;">Enviar ADG</h4>
+        <input type="text" id="sendTo" placeholder="Dirección destino" class="input-field" />
+        <input type="number" id="sendAmount" placeholder="Cantidad" class="input-field" min="0" step="0.01" />
+        <button onclick="enviarADG()" class="btn" style="width: 100%; margin-top: 8px;">Enviar</button>
+      </div>
+
+      <div id="swapForm" style="display: none; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 16px; margin-top: 12px;">
+        <h4 style="color: #60a5fa; font-size: 14px; margin-bottom: 12px;">Swap de Tokens</h4>
+        <select id="swapFrom" class="input-field">
+          <option value="ADG">ADG</option>
+          <option value="ADGS">ADGS (estable)</option>
+        </select>
+        <select id="swapTo" class="input-field">
+          <option value="ADGS">ADGS (estable)</option>
+          <option value="ADG">ADG</option>
+        </select>
+        <input type="number" id="swapAmount" placeholder="Cantidad" class="input-field" min="0" step="0.01" />
+        <button onclick="hacerSwap()" class="btn" style="width: 100%; margin-top: 8px;">Swap</button>
+      </div>
+
+      <div style="margin-top: 20px; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 14px;">
+        <div style="font-weight: 800; margin-bottom: 6px;">🔒 Cifrado E2E híbrido</div>
+        <div style="font-size: 0.85rem; color: #93c5fd;">
+          X25519 + ML-KEM-768 • ML-DSA-65 • Tor opcional • BLE mesh • WebRTC DTLS-SRTP
+        </div>
       </div>
     </div>
 
+    <div id="authForms">
+      <form id="createWalletForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Crear Wallet Maestra</h3>
+        <input type="text" id="createUsername" placeholder="Usuario (3-20 caracteres)" required minlength="3" maxlength="20" class="input-field" />
+        <input type="text" id="createPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
+        <button type="submit" class="btn" id="createWalletBtn">Crear Wallet</button>
+      </form>
+    </div>
+
     <div id="resultBox" class="result-box" style="display: none;"></div>
+
+    <div id="adesgoldCommissions" style="margin-top: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: rgba(15, 23, 42, 0.8); border: 1px solid #334155; padding: 10px 14px; border-radius: 10px;" onclick="toggleCommissions()">
+        <div style="font-weight: 800; color: #fbbf24;">💰 AdesGold Wallet - Comisiones del Sistema</div>
+        <span id="commissionsToggle" style="color: #60a5fa; font-size: 1.2rem;">▶</span>
+      </div>
+      <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 4px;">
+        AdesGold Wallet captura 85-90% de todas las comisiones &middot; Holders reciben 30% de las ventas automáticamente
+      </div>
+      <div id="commissionsDetail" style="display: none; margin-top: 14px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-bottom: 14px;">
+          <thead>
+            <tr style="color: #60a5fa;">
+              <th align="left" style="padding: 6px 8px; border-bottom: 1px solid #334155;">Acción Usuario</th>
+              <th align="center" style="padding: 6px 8px; border-bottom: 1px solid #334155;">% Comisión</th>
+              <th align="center" style="padding: 6px 8px; border-bottom: 1px solid #334155;">Distribución</th>
+              <th align="right" style="padding: 6px 8px; border-bottom: 1px solid #334155;">Ejemplo (100K tokens)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding: 6px 8px; color: #34d399;">💵 Compra tokens</td><td align="center" style="padding: 6px 8px;">0.25%</td><td align="center" style="padding: 6px 8px;">100% → AdesGold Wallet</td><td align="right" style="padding: 6px 8px;">250 tokens → AdesGold Wallet</td></tr>
+            <tr><td style="padding: 6px 8px; color: #34d399;">💸 Venta tokens</td><td align="center" style="padding: 6px 8px;">0.50%</td><td align="center" style="padding: 6px 8px;">70% AdesGold Wallet / 30% Holders</td><td align="right" style="padding: 6px 8px;">350 AdesGold Wallet / 150 Holders</td></tr>
+            <tr><td style="padding: 6px 8px; color: #34d399;">🎁 Claim resguardo</td><td align="center" style="padding: 6px 8px;">1.00%</td><td align="center" style="padding: 6px 8px;">100% → AdesGold Wallet</td><td align="right" style="padding: 6px 8px;">1,000 tokens → AdesGold Wallet</td></tr>
+            <tr><td style="padding: 6px 8px; color: #34d399;">🔄 Transfer wallet</td><td align="center" style="padding: 6px 8px;">0.10%</td><td align="center" style="padding: 6px 8px;">100% → AdesGold Wallet</td><td align="right" style="padding: 6px 8px;">100 tokens → AdesGold Wallet</td></tr>
+            <tr><td style="padding: 6px 8px; color: #34d399;">🎨 NFT crear</td><td align="center" style="padding: 6px 8px;">2.00%</td><td align="center" style="padding: 6px 8px;">100% → AdesGold Wallet</td><td align="right" style="padding: 6px 8px;">2,000 tokens → AdesGold Wallet</td></tr>
+          </tbody>
+        </table>
+
+        <div style="background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
+          <div style="font-weight: 800; color: #fbbf24; margin-bottom: 6px;">⚡ Time-lock por tier (según balance)</div>
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.72rem;">
+            <thead>
+              <tr style="color: #60a5fa;">
+                <th align="left" style="padding: 4px 6px;">Tier</th>
+                <th align="center" style="padding: 4px 6px;">Balance</th>
+                <th align="center" style="padding: 4px 6px;">Time-lock inicial</th>
+                <th align="center" style="padding: 4px 6px;">Venta diaria</th>
+                <th align="center" style="padding: 4px 6px;">Límite wallet</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding: 4px 6px; color: #34d399;">1 - Pequeño</td><td align="center" style="padding: 4px 6px;">&lt; 50K</td><td align="center" style="padding: 4px 6px;">0 días</td><td align="center" style="padding: 4px 6px;">0.5%</td><td align="center" style="padding: 4px 6px;">Sin límite</td></tr>
+              <tr><td style="padding: 4px 6px; color: #60a5fa;">2 - Medio</td><td align="center" style="padding: 4px 6px;">50K-500K</td><td align="center" style="padding: 4px 6px;">60 días</td><td align="center" style="padding: 4px 6px;">0.75%</td><td align="center" style="padding: 4px 6px;">1M (1%)</td></tr>
+              <tr><td style="padding: 4px 6px; color: #fbbf24;">3 - Ballena</td><td align="center" style="padding: 4px 6px;">500K-2M</td><td align="center" style="padding: 4px 6px;">120 días</td><td align="center" style="padding: 4px 6px;">0.5%</td><td align="center" style="padding: 4px 6px;">2M (2%)</td></tr>
+              <tr><td style="padding: 4px 6px; color: #f59e0b;">4 - Súper ballena</td><td align="center" style="padding: 4px 6px;">2M-10M</td><td align="center" style="padding: 4px 6px;">180 días</td><td align="center" style="padding: 4px 6px;">0.25%</td><td align="center" style="padding: 4px 6px;">3M (3%)</td></tr>
+              <tr><td style="padding: 4px 6px; color: #ff2d55;">5 - BOT</td><td align="center" style="padding: 4px 6px;">Detectado</td><td align="center" style="padding: 4px 6px;">365 días</td><td align="center" style="padding: 4px 6px;">0.1%</td><td align="center" style="padding: 4px 6px;">1M (1%)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="font-family: monospace; font-size: 0.68rem; color: #64748b; white-space: pre-wrap;">
+          💳 ADESGOLD WALLET COMISIONES<br>
+          Compra: 0.25% → AdesGold Wallet<br>
+          Venta: 0.50% → 70% AdesGold Wallet / 30% Holders<br>
+          Claim: 1% → AdesGold Wallet<br>
+          Transfer: 0.1% → AdesGold Wallet<br>
+          NFT: 2% → AdesGold Wallet<br><br>
+          ✅ Holders reflect automático ventas | ✅ Time-lock anti-dump | ✅ 70% supply libre día 1
+        </div>
+      </div>
+    </div>
   </section>
 
-  <section class="container">
+    <div class="interactive-panel">
+      <h2>QuantumCall - Llamadas Cifradas Post-Cuánticas</h2>
+      <div style="text-align: center; margin-bottom: 1.5rem; color: #60a5fa; font-weight: 700;">
+        📞 Sistema de telecomunicaciones seguro • Cifrado X25519 + ML-KEM-768 • Sin usuario/clave separado
+      </div>
+
+      <div id="callStatus" style="display:none; background: #1e3a8a; border: 1px solid #3b82f6; border-radius: 8px; padding: 10px; margin-bottom: 12px; font-size: 13px; color: #93c5fd; text-align: center;"></div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+        <div>
+          <h3 style="color: #00d4ff; margin-bottom: 1rem; font-size: 1.1rem;">Iniciar Llamada</h3>
+          <form id="callForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <input type="text" id="callTarget" placeholder="Dirección wallet del destinatario" required />
+            <select id="callType" class="input-field">
+              <option value="audio">Audio</option>
+              <option value="video">Video</option>
+            </select>
+            <select id="callTransport" class="input-field">
+              <option value="direct">Directo</option>
+              <option value="tor">Tor opcional</option>
+              <option value="ble-mesh">BLE mesh</option>
+            </select>
+            <button type="submit" class="btn" id="callBtn">📞 Iniciar llamada</button>
+          </form>
+        </div>
+
+        <div>
+          <h3 style="color: #00d4ff; margin-bottom: 1rem; font-size: 1.1rem;">Estado de Seguridad</h3>
+          <div id="callSecurity" style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 12px; color: #93c5fd;">
+            <div>Cargando...</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="callResultBox" class="result-box" style="display: none;"></div>
+    </div>
+
+    <section class="container">
     <div class="tech-stack">
       <h3>Tecnologías</h3>
       <div class="tech-tags">
@@ -400,7 +560,7 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const API_BASE = urlParams.get('api') || window.location.origin;
+    const API_BASE = urlParams.get('api') || 'http://localhost:3001';
 
     function showResult(data, isError = false) {
       const box = document.getElementById('resultBox');
@@ -412,6 +572,18 @@
 
     function hideResult() {
       document.getElementById('resultBox').style.display = 'none';
+    }
+
+    function toggleCommissions() {
+      const detail = document.getElementById('commissionsDetail');
+      const toggle = document.getElementById('commissionsToggle');
+      if (detail.style.display === 'none') {
+        detail.style.display = 'block';
+        toggle.textContent = '▼';
+      } else {
+        detail.style.display = 'none';
+        toggle.textContent = '▶';
+      }
     }
 
     async function checkApiHealth() {
@@ -449,6 +621,7 @@
         if (!res.ok) throw new Error(data.error || 'Error al crear wallet');
         showResult(data);
         alert('Wallet creada. Guarda tu frase semilla.');
+        showWalletPanel(data.wallet);
       } catch (err) {
         showResult({ error: err.message }, true);
       } finally {
@@ -457,36 +630,44 @@
       }
     });
 
-    document.getElementById('balanceForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideResult();
-      const btn = document.getElementById('balanceBtn');
-      btn.disabled = true;
-      btn.textContent = 'Consultando...';
+    function showWalletPanel(wallet) {
+      document.getElementById('authForms').style.display = 'none';
+      const panel = document.getElementById('walletPanel');
+      panel.style.display = 'block';
+      document.getElementById('walletUsername').textContent = wallet.username || 'Usuario';
+      document.getElementById('walletAddress').textContent = wallet.address || wallet.walletAddress || '';
+      document.getElementById('walletBalance').textContent = wallet.balance ?? 0;
+      document.getElementById('walletAvatar').textContent = '👤';
+      checkApiHealth();
+    }
+
+    async function minarBloque() {
       try {
-        const address = document.getElementById('balanceAddress').value;
-        const res = await fetch(`${API_BASE}/api/wallet/balance/${address}`);
+        const res = await fetch(`${API_BASE}/api/wallet/mine`, { method: 'POST' });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Error al consultar balance');
-        showResult(data);
+        if (!res.ok) throw new Error(data.error || 'Error al minar');
+        alert('Bloque minado: ' + JSON.stringify(data));
       } catch (err) {
         showResult({ error: err.message }, true);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Consultar Balance';
       }
-    });
+    }
 
-    document.getElementById('sendForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideResult();
-      const btn = document.getElementById('sendBtn');
-      btn.disabled = true;
-      btn.textContent = 'Enviando...';
+    function mostrarEnviar() {
+      document.getElementById('swapForm').style.display = 'none';
+      document.getElementById('sendForm').style.display = 'block';
+    }
+
+    function mostrarSwap() {
+      document.getElementById('sendForm').style.display = 'none';
+      document.getElementById('swapForm').style.display = 'block';
+    }
+
+    async function enviarADG() {
       try {
-        const sender = document.getElementById('sendFrom').value;
-        const recipient = document.getElementById('sendTo').value;
+        const sender = document.getElementById('walletAddress').textContent;
+        const recipient = document.getElementById('sendTo').value.trim();
         const amount = parseFloat(document.getElementById('sendAmount').value);
+        if (!recipient || isNaN(amount) || amount <= 0) throw new Error('Datos de envío inválidos');
         const res = await fetch(`${API_BASE}/api/wallet/send`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -495,15 +676,102 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al enviar');
         showResult(data);
+        document.getElementById('sendForm').style.display = 'none';
       } catch (err) {
+        showResult({ error: err.message }, true);
+      }
+    }
+
+    async function hacerSwap() {
+      try {
+        const sender = document.getElementById('walletAddress').textContent;
+        const from = document.getElementById('swapFrom').value;
+        const to = document.getElementById('swapTo').value;
+        const amount = parseFloat(document.getElementById('swapAmount').value);
+        if (!sender || !sender.trim()) throw new Error('Necesitas crear una wallet primero');
+        if (from === to) throw new Error('Selecciona tokens diferentes');
+        if (isNaN(amount) || amount <= 0) throw new Error('Cantidad inválida');
+        const res = await fetch(`${API_BASE}/api/wallet/swap`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sender, fromDenom: from, toDenom: to, amount }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error en swap');
+        showResult(data);
+        document.getElementById('swapForm').style.display = 'none';
+      } catch (err) {
+        showResult({ error: err.message }, true);
+      }
+    }
+
+    checkApiHealth();
+
+    // QuantumCall integration
+    async function loadCallSecurity() {
+      try {
+        const res = await fetch(`${API_BASE}/api/call/security`);
+        const data = await res.json();
+        if (res.ok) {
+          const box = document.getElementById('callSecurity');
+          box.innerHTML = `
+            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px;">
+              <div style="font-weight: 800; margin-bottom: 4px;">Cifrado E2E híbrido</div>
+              <div>${data.encryption}</div>
+            </div>
+            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px;">
+              <div style="font-weight: 800; margin-bottom: 4px;">Firmas poscuánticas</div>
+              <div>${data.signatures}</div>
+            </div>
+            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px;">
+              <div style="font-weight: 800; margin-bottom: 4px;">Red</div>
+              <div>Tor: ${data.torEnabled ? 'Activado' : 'Desactivado'} • BLE: ${data.bleEnabled ? 'Activado' : 'Desactivado'}</div>
+            </div>
+            <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px;">
+              <div style="font-weight: 800; margin-bottom: 4px;">Privacidad</div>
+              <div>Captura: ${data.screenshotDetection ? 'Detectada' : 'No'} • Blur: ${data.blurInRecents ? 'Sí' : 'No'}</div>
+            </div>
+          `;
+        } else {
+          document.getElementById('callSecurity').innerHTML = '<div>Error cargando seguridad</div>';
+        }
+      } catch (err) {
+        document.getElementById('callSecurity').innerHTML = '<div>Sin conexión al API de llamadas</div>';
+      }
+    }
+
+    document.getElementById('callForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideResult();
+      const btn = document.getElementById('callBtn');
+      const status = document.getElementById('callStatus');
+      btn.disabled = true;
+      btn.textContent = 'Llamando...';
+      status.style.display = 'block';
+      status.textContent = 'Estableciendo cifrado híbrido X25519 + ML-KEM-768...';
+      try {
+        const calleeAddress = document.getElementById('callTarget').value;
+        const type = document.getElementById('callType').value;
+        const transport = document.getElementById('callTransport').value;
+        const res = await fetch(`${API_BASE}/api/call/initiate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ callerAddress: 'local', calleeAddress, type, transport }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error en llamada');
+        showResult(data);
+        status.textContent = `Llamada ${type} iniciada • Transporte: ${transport} • Cifrado activo`;
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
         showResult({ error: err.message }, true);
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Enviar';
+        btn.textContent = '📞 Iniciar llamada';
       }
     });
 
-    checkApiHealth();
+    loadCallSecurity();
   </script>
 </body>
 </html>

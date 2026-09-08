@@ -2,10 +2,12 @@ import { ADES_GOLD, MNEMONIC_WORDS, MASTER_WALLET_ADDRESS, ECO_WALLET_ADDRESS } 
 import { PQCrypto, PQKeyPair, PQPubKey, PQPrivKey, PQSignature, PQSharedSecret, SignedMessage } from './pq-crypto.js';
 import { PoDTConsensus, Validator, TrustScore, Proposal, SlashingEvent, PoDTConfig, DEFAULT_PODT_CONFIG, ValidatorStatus, VoteOption, ProposalType } from './podt-consensus.js';
 import { PrivacyManager, StealthKeyPair, StealthAddress, ConfidentialTx, PaymentOutput, RangeProof } from './privacy.js';
+import { QuantumCall, QuantumCallSession, PeerInfo, CallOffer, CallAnswer, QuantumCallConfig, DEFAULT_QUANTUM_CALL_CONFIG, CallStatus, CallType, TransportMode } from './quantum-call.js';
 export { ADES_GOLD, MNEMONIC_WORDS, MASTER_WALLET_ADDRESS, ECO_WALLET_ADDRESS };
 export { PQCrypto, PQKeyPair, PQPubKey, PQPrivKey, PQSignature, PQSharedSecret, SignedMessage };
 export { PoDTConsensus, Validator, TrustScore, Proposal, SlashingEvent, PoDTConfig, DEFAULT_PODT_CONFIG, ValidatorStatus, VoteOption, ProposalType };
 export { PrivacyManager, StealthKeyPair, StealthAddress, ConfidentialTx, PaymentOutput, RangeProof };
+export { QuantumCall, QuantumCallSession, PeerInfo, CallOffer, CallAnswer, QuantumCallConfig, DEFAULT_QUANTUM_CALL_CONFIG, CallStatus, CallType, TransportMode };
 export interface MasterWalletData {
     username: string;
     walletAddress: string;

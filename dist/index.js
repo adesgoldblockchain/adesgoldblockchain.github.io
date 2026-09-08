@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AdesGoldWallet = exports.PrivacyManager = exports.DEFAULT_PODT_CONFIG = exports.PoDTConsensus = exports.PQCrypto = exports.ECO_WALLET_ADDRESS = exports.MASTER_WALLET_ADDRESS = exports.MNEMONIC_WORDS = exports.ADES_GOLD = void 0;
+exports.AdesGoldWallet = exports.DEFAULT_QUANTUM_CALL_CONFIG = exports.QuantumCall = exports.PrivacyManager = exports.DEFAULT_PODT_CONFIG = exports.PoDTConsensus = exports.PQCrypto = exports.ECO_WALLET_ADDRESS = exports.MASTER_WALLET_ADDRESS = exports.MNEMONIC_WORDS = exports.ADES_GOLD = void 0;
 const node_crypto_1 = __importDefault(require("node:crypto"));
 const constants_js_1 = require("./constants.js");
 Object.defineProperty(exports, "ADES_GOLD", { enumerable: true, get: function () { return constants_js_1.ADES_GOLD; } });
@@ -17,6 +17,9 @@ Object.defineProperty(exports, "PoDTConsensus", { enumerable: true, get: functio
 Object.defineProperty(exports, "DEFAULT_PODT_CONFIG", { enumerable: true, get: function () { return podt_consensus_js_1.DEFAULT_PODT_CONFIG; } });
 const privacy_js_1 = require("./privacy.js");
 Object.defineProperty(exports, "PrivacyManager", { enumerable: true, get: function () { return privacy_js_1.PrivacyManager; } });
+const quantum_call_js_1 = require("./quantum-call.js");
+Object.defineProperty(exports, "QuantumCall", { enumerable: true, get: function () { return quantum_call_js_1.QuantumCall; } });
+Object.defineProperty(exports, "DEFAULT_QUANTUM_CALL_CONFIG", { enumerable: true, get: function () { return quantum_call_js_1.DEFAULT_QUANTUM_CALL_CONFIG; } });
 class AdesGoldWallet {
     constructor(masterWalletAddress = constants_js_1.MASTER_WALLET_ADDRESS, ecoWalletAddress = constants_js_1.ECO_WALLET_ADDRESS) {
         this.bankBalances = new Map();
@@ -191,8 +194,8 @@ class AdesGoldWallet {
         const masterFee = fee * constants_js_1.ADES_GOLD.MASTER_WALLET_FEE_SHARE;
         const netAmount = amount - fee;
         const rates = {
-            'TUDOR->ADG': 100,
-            'ADG->TUDOR': 0.01,
+            'ADGS->ADG': 1,
+            'ADG->ADGS': 1,
         };
         const rateKey = `${fromDenom}->${toDenom}`;
         const rate = rates[rateKey] || 1;
