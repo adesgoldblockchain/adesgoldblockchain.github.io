@@ -637,6 +637,8 @@
               <option value="ble-mesh">BLE mesh</option>
             </select>
             <button type="submit" class="btn" id="callBtn">📞 Iniciar llamada</button>
+<button type="button" class="btn" onclick="importContacts()">Importar contactos</button>
+<div id="contactsList" style="display:none; margin-top:10px; max-height:200px; overflow-y:auto;"></div>
           </form>
         </div>
 
@@ -898,6 +900,36 @@
       });
       resetInactivity();
     }
+
+// Import contacts from device (Web Contacts API)
+async function importContacts() {
+  if (navigator.contacts && navigator.contacts.select) {
+    try {
+      const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: true });
+      const listDiv = document.getElementById('contactsList');
+      if (!listDiv) return;
+      listDiv.innerHTML = '';
+      contacts.forEach(c => {
+        const name = (c.name && c.name[0]) || 'Sin nombre';
+        const tel = (c.tel && c.tel[0]) || '';
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.style.margin = '2px';
+        btn.textContent = `${name}: ${tel}`;
+        btn.onclick = () => {
+          const target = document.getElementById('callTarget');
+          if (target) target.value = tel;
+        };
+        listDiv.appendChild(btn);
+      });
+      listDiv.style.display = 'block';
+    } catch (e) {
+      showResult({ error: 'Error al obtener contactos: ' + e }, true);
+    }
+  } else {
+    showResult({ error: 'API de contactos no disponible en este navegador.' }, true);
+  }
+}
 
     async function tryAutoLogin() {
       const session = loadSession();
