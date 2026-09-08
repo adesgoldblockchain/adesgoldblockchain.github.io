@@ -352,6 +352,62 @@
     <p style="margin-top: 0.5rem; font-size: 0.9rem;">Token nativo: ADG | Suministro total: 100,000,000</p>
   </header>
 
+  <section class="hero">
+    <h2>La blockchain del futuro con resistencia cuántica</h2>
+    <p>
+      AdesGold implementa el <strong>consenso PoDT (Proof of Digital Trust)</strong>, un algoritmo de consenso
+      basado en puntuaciones de confianza y reputación de validadores. Combinado con criptografía
+      <strong>post-cuántica</strong> (firmas XMSS-SHA2) y <strong>privacidad avanzada</strong> (direcciones
+      stealth, transacciones confidenciales y firmas anónimas), AdesGold ofrece una red blockchain segura
+      contra amenazas cuánticas futuras.
+    </p>
+    <div id="heroAuthButtons" style="margin-top: 1.5rem; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+      <button class="btn" onclick="showAuthView('create')">Crear Wallet</button>
+      <button class="btn" style="background: linear-gradient(135deg, #475569 0%, #334155 100%);" onclick="showAuthView('login')">Iniciar Sesión</button>
+      <button class="btn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000;" onclick="showAuthView('recover')">Recuperar Wallet</button>
+    </div>
+  </section>
+
+  <div id="authArea" style="display: none; max-width: 1100px; margin: 0 auto; padding: 0 2rem 2rem;">
+    <div id="authForms">
+      <form id="createWalletForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Crear Wallet Maestra</h3>
+        <input type="text" id="createUsername" placeholder="Usuario (3-20 caracteres)" required minlength="3" maxlength="20" class="input-field" />
+        <input type="text" id="createPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
+        <button type="submit" class="btn" id="createWalletBtn">Crear Wallet</button>
+      </form>
+
+      <form id="loginForm" style="display: none; flex-direction: column; gap: 0.75rem;">
+        <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Iniciar Sesión</h3>
+        <input type="text" id="loginSeedPhrase" placeholder="Frase semilla (12 palabras separadas por espacio)" required class="input-field" />
+        <input type="text" id="loginPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
+        <button type="button" class="btn" id="loginBtn">Entrar</button>
+      </form>
+    </div>
+
+    <div id="seedPhrasePanel" style="display: none; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 16px; margin-top: 12px;">
+      <h3 style="color: #fbbf24; margin-bottom: 10px; text-align: center;">🔐 Guarda tu frase de recuperación</h3>
+      <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin-bottom: 10px;">Anota estas 12 palabras en un lugar seguro. No las compartas.</p>
+      <div id="seedPhraseWords" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 12px;"></div>
+      <button type="button" class="btn" id="confirmSeedBtn" style="width: 100%;">Confirmar y continuar</button>
+    </div>
+
+    <div id="recoverForm" style="display: none; flex-direction: column; gap: 0.75rem;">
+      <h3 style="color: #fbbf24; margin-bottom: 8px; text-align: center;">Recuperar Wallet</h3>
+      <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin-bottom: 10px;">Ingresa tus 12 palabras para recuperar tu cuenta.</p>
+      <textarea id="recoverSeedPhrase" placeholder="Escribe las 12 palabras separadas por espacio" required class="input-field" rows="3"></textarea>
+      <button type="button" class="btn" id="recoverNextBtn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000;">Continuar</button>
+    </div>
+
+    <div id="recoverResetForm" style="display: none; flex-direction: column; gap: 0.75rem;">
+      <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Configurar acceso</h3>
+      <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin-bottom: 10px;">Elige un nuevo nombre de usuario y PIN. La cuenta quedará unida a tus 12 palabras.</p>
+      <input type="text" id="recoverUsername" placeholder="Nombre de usuario (3-20 caracteres)" required minlength="3" maxlength="20" class="input-field" />
+      <input type="text" id="recoverPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
+      <button type="button" class="btn" id="recoverConfirmBtn">Recuperar y entrar</button>
+    </div>
+  </div>
+
   <div id="sessionBar"></div>
   <div id="sessionPanel" class="session-panel" style="display: none;">
     <div class="dot"></div>
@@ -807,11 +863,22 @@
 
     function lockSession() {
       clearSession();
-      document.getElementById('walletPanel').style.display = 'none';
-      document.getElementById('authForms').style.display = 'flex';
-      document.getElementById('loginForm').style.display = 'none';
-      document.getElementById('createWalletForm').style.display = 'flex';
+      const walletPanel = document.getElementById('walletPanel');
+      const authArea = document.getElementById('authArea');
+      const heroAuth = document.getElementById('heroAuthButtons');
+      const sessionPanel = document.getElementById('sessionPanel');
+      const bar = document.getElementById('sessionBar');
+      if (walletPanel) walletPanel.style.display = 'none';
+      if (authArea) authArea.style.display = 'none';
+      if (heroAuth) heroAuth.style.display = 'flex';
+      if (sessionPanel) sessionPanel.style.display = 'none';
+      if (bar) { bar.style.width = '100%'; bar.classList.remove('warning', 'danger'); }
       document.getElementById('resultBox').style.display = 'none';
+      document.getElementById('seedPhrasePanel').style.display = 'none';
+      document.getElementById('recoverForm').style.display = 'none';
+      document.getElementById('recoverResetForm').style.display = 'none';
+      document.getElementById('createWalletForm').style.display = 'flex';
+      document.getElementById('loginForm').style.display = 'none';
     }
 
     function formatTime(ms) {
@@ -883,6 +950,43 @@
       return false;
     }
 
+    function showAuthView(view) {
+      const heroAuth = document.getElementById('heroAuthButtons');
+      const authArea = document.getElementById('authArea');
+      const createForm = document.getElementById('createWalletForm');
+      const loginForm = document.getElementById('loginForm');
+      const recoverForm = document.getElementById('recoverForm');
+      const recoverReset = document.getElementById('recoverResetForm');
+      const seedPanel = document.getElementById('seedPhrasePanel');
+      if (heroAuth) heroAuth.style.display = 'none';
+      if (authArea) authArea.style.display = 'block';
+      if (seedPanel) seedPanel.style.display = 'none';
+      if (createForm) createForm.style.display = 'none';
+      if (loginForm) loginForm.style.display = 'none';
+      if (recoverForm) recoverForm.style.display = 'none';
+      if (recoverReset) recoverReset.style.display = 'none';
+      if (view === 'create' && createForm) createForm.style.display = 'flex';
+      if (view === 'login' && loginForm) loginForm.style.display = 'flex';
+      if (view === 'recover' && recoverForm) recoverForm.style.display = 'flex';
+    }
+
+    function showLanding() {
+      const heroAuth = document.getElementById('heroAuthButtons');
+      const authArea = document.getElementById('authArea');
+      const createForm = document.getElementById('createWalletForm');
+      const loginForm = document.getElementById('loginForm');
+      const recoverForm = document.getElementById('recoverForm');
+      const recoverReset = document.getElementById('recoverResetForm');
+      const seedPanel = document.getElementById('seedPhrasePanel');
+      if (heroAuth) heroAuth.style.display = 'flex';
+      if (authArea) authArea.style.display = 'none';
+      if (createForm) createForm.style.display = 'flex';
+      if (loginForm) loginForm.style.display = 'none';
+      if (recoverForm) recoverForm.style.display = 'none';
+      if (recoverReset) recoverReset.style.display = 'none';
+      if (seedPanel) seedPanel.style.display = 'none';
+    }
+
     document.getElementById('createWalletForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       hideResult();
@@ -940,7 +1044,7 @@
           showResult({ error: err.message }, true);
         }
       }
-      document.getElementById('loginForm').style.display = 'flex';
+      showAuthView('login');
     });
 
     document.getElementById('loginBtn').addEventListener('click', async () => {
@@ -962,12 +1066,65 @@
       }
     });
 
+    document.getElementById('recoverNextBtn').addEventListener('click', async () => {
+      const raw = document.getElementById('recoverSeedPhrase').value.trim();
+      if (!raw) return;
+      const seedPhrase = raw.split(/\s+/);
+      if (seedPhrase.length !== 12) {
+        showResult({ error: 'Debes ingresar exactamente 12 palabras' }, true);
+        return;
+      }
+      try {
+        const existing = adesGoldWallet?.getWalletBySeedPhrase?.(seedPhrase);
+        const usernameInput = document.getElementById('recoverUsername');
+        const pinInput = document.getElementById('recoverPin');
+        if (existing && usernameInput) {
+          usernameInput.value = existing.username || '';
+        }
+        document.getElementById('recoverForm').style.display = 'none';
+        document.getElementById('recoverResetForm').style.display = 'flex';
+        window._pendingRecoverSeed = seedPhrase;
+      } catch (err) {
+        showResult({ error: err.message }, true);
+      }
+    });
+
+    document.getElementById('recoverConfirmBtn').addEventListener('click', async () => {
+      const seedPhrase = window._pendingRecoverSeed;
+      if (!seedPhrase || !Array.isArray(seedPhrase) || seedPhrase.length !== 12) {
+        showResult({ error: 'Sesión de recuperación inválida' }, true);
+        return;
+      }
+      const username = document.getElementById('recoverUsername').value.trim();
+      const pinCode = document.getElementById('recoverPin').value.trim();
+      if (!username || !pinCode) {
+        showResult({ error: 'Completa usuario y PIN' }, true);
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/api/wallet/recover`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ seedPhrase, username, pinCode }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al recuperar');
+        document.getElementById('recoverResetForm').style.display = 'none';
+        showWalletPanel(data.wallet);
+      } catch (err) {
+        showResult({ error: err.message }, true);
+      }
+    });
+
     document.getElementById('logoutBtn').addEventListener('click', () => {
       lockSession();
+      showLanding();
     });
 
     function showWalletPanel(wallet, isAuto = false) {
       document.getElementById('authForms').style.display = 'none';
+      document.getElementById('authArea').style.display = 'none';
+      document.getElementById('heroAuthButtons').style.display = 'none';
       const panel = document.getElementById('walletPanel');
       panel.style.display = 'block';
       document.getElementById('walletUsername').textContent = wallet.username || 'Usuario';

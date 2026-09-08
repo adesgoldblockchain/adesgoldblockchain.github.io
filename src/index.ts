@@ -212,6 +212,77 @@ export class AdesGoldWallet {
     return null;
   }
 
+  public recoverWallet(seedPhrase: string[], options?: { username?: string; pinCode?: string }): MasterWalletData {
+    if (!this.validateSeedPhrase(seedPhrase)) {
+      throw new Error('Frase semilla inválida');
+    }
+
+    const walletAddress = this.deriveAddress(seedPhrase);
+    let wallet = this.masterWallets.get(walletAddress);
+
+    if (!wallet) {
+      const cleanUsername = options?.username?.trim().toLowerCase() || `wallet_${walletAddress.slice(-6)}`;
+      if (!/^[a-z0-9_]{3,20}$/.test(cleanUsername)) {
+        throw new Error('Nombre de usuario inválido');
+      }
+      if (options?.pinCode && !this.validatePinCode(options.pinCode)) {
+        throw new Error('PIN inválido');
+      }
+      const pinCodeHash = options?.pinCode ? this.hashPinCode(options.pinCode) : crypto.createHash('sha256').update('000000').digest('hex');
+      const allocation = 0;
+
+      wallet = {
+        username: cleanUsername,
+        walletAddress,
+        seedPhrase,
+        pinCodeHash,
+        balance: allocation,
+        isActive: true,
+        createdAt: Date.now(),
+        tokenDistribution: {
+          masterWalletsShare: ADES_GOLD.MASTER_WALLET_SHARE,
+          ecosystemShare: ADES_GOLD.ECOSYSTEM_SHARE,
+          totalAllocated: allocation,
+        },
+      };
+
+      this.masterWallets.set(walletAddress, wallet);
+      this.bankBalances.set(walletAddress, allocation);
+
+      this.transactions.push({
+        txHash: `recover_${crypto.randomBytes(8).toString('hex')}`,
+        type: 'distribution',
+        from: 'recovery',
+        to: walletAddress,
+        amount: allocation,
+        denom: ADES_GOLD.DENOM,
+        fee: 0,
+        timestamp: Date.now(),
+        status: 'completed',
+      });
+    } else if (options?.pinCode) {
+      if (!this.validatePinCode(options.pinCode)) {
+        throw new Error('PIN inválido');
+      }
+      wallet.pinCodeHash = this.hashPinCode(options.pinCode);
+      if (options.username && options.username.trim()) {
+        wallet.username = options.username.trim().toLowerCase();
+      }
+    }
+
+    return { ...wallet };
+  }
+
+  public getWalletBySeedPhrase(seedPhrase: string[]): MasterWalletData | null {
+    if (!this.validateSeedPhrase(seedPhrase)) {
+      return null;
+    }
+    const address = this.deriveAddress(seedPhrase);
+    const wallet = this.masterWallets.get(address);
+    if (!wallet) return null;
+    return this.sanitizeWallet(wallet);
+  }
+
   private sanitizeWallet(wallet: MasterWalletData): MasterWalletData | null {
     const { pinCodeHash, seedPhrase, ...safe } = wallet;
     return { ...safe, pinCodeHash, seedPhrase } as MasterWalletData;

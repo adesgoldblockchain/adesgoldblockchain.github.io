@@ -56,6 +56,28 @@ app.post('/api/wallet/authenticate', (req, res) => {
   }
 });
 
+app.post('/api/wallet/recover', (req, res) => {
+  try {
+    const { seedPhrase, username, pinCode } = req.body;
+    if (!seedPhrase || !Array.isArray(seedPhrase) || seedPhrase.length !== 12) {
+      return res.status(400).json({ ok: false, error: 'Debes ingresar exactamente 12 palabras de recuperación' });
+    }
+    const existing = adesGoldWallet.getWalletBySeedPhrase(seedPhrase);
+    const wallet = adesGoldWallet.recoverWallet(seedPhrase, { username, pinCode });
+    const safeWallet = existing
+      ? (() => { const { pinCodeHash: _, seedPhrase: __, ...rest } = wallet; return rest; })()
+      : (() => { const { pinCodeHash: _, seedPhrase: __, ...rest } = wallet; return rest; })();
+    res.json({
+      ok: true,
+      wallet: safeWallet,
+      recovered: !!existing,
+      message: existing ? 'Cuenta recuperada y actualizada' : 'Cuenta creada desde frase de recuperación',
+    });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
 app.get('/api/wallet/balance/:address', (req, res) => {
   try {
     const address = req.params.address;

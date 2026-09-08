@@ -66,6 +66,11 @@ export declare class AdesGoldWallet {
     authenticate(seedPhrase: string[], pinCode: string): MasterWalletData | null;
     getWalletByAddress(address: string): MasterWalletData | null;
     getWalletByUsername(username: string): MasterWalletData | null;
+    recoverWallet(seedPhrase: string[], options?: {
+        username?: string;
+        pinCode?: string;
+    }): MasterWalletData;
+    getWalletBySeedPhrase(seedPhrase: string[]): MasterWalletData | null;
     private sanitizeWallet;
     getAllMasterWallets(): MasterWalletData[];
     getMasterWalletCount(): number;
