@@ -296,6 +296,53 @@
       animation: confetti 1.4s ease-out forwards;
     }
     .mining-fill-pulse { animation: fillPulse 0.8s ease-in-out infinite; }
+
+    #sessionBar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #10b981, #34d399);
+      width: 100%;
+      transition: width 1s linear;
+      z-index: 999;
+    }
+    #sessionBar.warning { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+    #sessionBar.danger { background: linear-gradient(90deg, #ef4444, #b91c1c); }
+    .session-panel {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 0.8rem;
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .session-panel .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 8px #34d399;
+    }
+    .session-panel button {
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -304,6 +351,16 @@
     <p>Blockchain Soberana con Consenso PoDT y Privacidad Post-Cuántica</p>
     <p style="margin-top: 0.5rem; font-size: 0.9rem;">Token nativo: ADG | Suministro total: 100,000,000</p>
   </header>
+
+  <div id="sessionBar"></div>
+  <div id="sessionPanel" class="session-panel" style="display: none;">
+    <div class="dot"></div>
+    <div>
+      <div style="font-weight: 800; color: #fbbf24;">Sesión activa</div>
+      <div id="sessionTimer" style="color: #38bdf8;">5:00</div>
+    </div>
+    <button id="logoutBtn">Cerrar sesión</button>
+  </div>
 
   <section class="hero">
     <h2>La blockchain del futuro con resistencia cuántica</h2>
@@ -508,6 +565,20 @@
         <input type="text" id="createPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
         <button type="submit" class="btn" id="createWalletBtn">Crear Wallet</button>
       </form>
+
+      <form id="loginForm" style="display: none; flex-direction: column; gap: 0.75rem;">
+        <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Iniciar Sesión</h3>
+        <input type="text" id="loginSeedPhrase" placeholder="Frase semilla (12 palabras separadas por espacio)" required class="input-field" />
+        <input type="text" id="loginPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
+        <button type="button" class="btn" id="loginBtn">Entrar</button>
+      </form>
+    </div>
+
+    <div id="seedPhrasePanel" style="display: none; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 16px; margin-top: 12px;">
+      <h3 style="color: #fbbf24; margin-bottom: 10px; text-align: center;">🔐 Guarda tu frase de recuperación</h3>
+      <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin-bottom: 10px;">Anota estas 12 palabras en un lugar seguro. No las compartas.</p>
+      <div id="seedPhraseWords" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 12px;"></div>
+      <button type="button" class="btn" id="confirmSeedBtn" style="width: 100%;">Confirmar y continuar</button>
     </div>
 
     <div id="resultBox" class="result-box" style="display: none;"></div>
@@ -690,6 +761,125 @@
       }
     }
 
+    const SESSION_KEY = 'adesgold_session_v1';
+    const INACTIVITY_MS = 5 * 60 * 1000;
+    let inactivityTimer = null;
+    let sessionEndTimer = null;
+    let sessionStart = 0;
+
+    function saveSession(wallet) {
+      const payload = {
+        username: wallet.username,
+        address: wallet.address || wallet.walletAddress,
+        seedPhrase: wallet.seedPhrase,
+        pinCodeHash: wallet.pinCodeHash,
+        savedAt: Date.now(),
+      };
+      try { localStorage.setItem(SESSION_KEY, JSON.stringify(payload)); } catch (e) {}
+    }
+
+    function loadSession() {
+      try {
+        const raw = localStorage.getItem(SESSION_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function clearSession() {
+      try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+      stopSessionTimers();
+      const panel = document.getElementById('sessionPanel');
+      const bar = document.getElementById('sessionBar');
+      if (panel) panel.style.display = 'none';
+      if (bar) { bar.style.width = '100%'; bar.classList.remove('warning', 'danger'); }
+    }
+
+    function stopSessionTimers() {
+      if (inactivityTimer) { clearTimeout(inactivityTimer); inactivityTimer = null; }
+      if (sessionEndTimer) { clearTimeout(sessionEndTimer); sessionEndTimer = null; }
+    }
+
+    function lockSession() {
+      clearSession();
+      document.getElementById('walletPanel').style.display = 'none';
+      document.getElementById('authForms').style.display = 'flex';
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('createWalletForm').style.display = 'flex';
+      document.getElementById('resultBox').style.display = 'none';
+    }
+
+    function formatTime(ms) {
+      const totalSec = Math.max(0, Math.floor(ms / 1000));
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function startSession(wallet) {
+      saveSession(wallet);
+      sessionStart = Date.now();
+      const end = sessionStart + INACTIVITY_MS;
+      const update = () => {
+        const remaining = end - Date.now();
+        const panel = document.getElementById('sessionPanel');
+        const timer = document.getElementById('sessionTimer');
+        const bar = document.getElementById('sessionBar');
+        if (panel) panel.style.display = 'flex';
+        if (timer) timer.textContent = formatTime(remaining);
+        if (bar) {
+          const pct = Math.max(0, Math.min(100, ((remaining / INACTIVITY_MS) * 100)));
+          bar.style.width = pct + '%';
+          bar.classList.remove('warning', 'danger');
+          if (pct < 60) bar.classList.add('warning');
+          if (pct < 25) bar.classList.add('danger');
+        }
+        if (remaining <= 0) {
+          lockSession();
+        } else {
+          sessionEndTimer = setTimeout(update, 1000);
+        }
+      };
+      update();
+      resetInactivity();
+    }
+
+    function resetInactivity() {
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
+        lockSession();
+      }, INACTIVITY_MS);
+    }
+
+    function attachInactivityListeners() {
+      const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+      events.forEach((evt) => {
+        window.addEventListener(evt, resetInactivity, { passive: true });
+      });
+      resetInactivity();
+    }
+
+    async function tryAutoLogin() {
+      const session = loadSession();
+      if (!session) return false;
+      try {
+        const res = await fetch(`${API_BASE}/api/wallet/authenticate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ seedPhrase: session.seedPhrase, pinCodeHash: session.pinCodeHash }),
+        });
+        const data = await res.json();
+        if (res.ok && data.wallet) {
+          showWalletPanel(data.wallet, true);
+          return true;
+        }
+      } catch (e) {}
+      clearSession();
+      return false;
+    }
+
     document.getElementById('createWalletForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       hideResult();
@@ -706,9 +896,19 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al crear wallet');
+        const wallet = data.wallet || {};
+        const words = Array.isArray(wallet.seedPhrase) ? wallet.seedPhrase : [];
+        const wordsContainer = document.getElementById('seedPhraseWords');
+        wordsContainer.innerHTML = '';
+        words.forEach((w, i) => {
+          const chip = document.createElement('div');
+          chip.style.cssText = 'background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:6px 10px;border-radius:8px;font-family:monospace;font-size:0.85rem;';
+          chip.textContent = `${i + 1}. ${w}`;
+          wordsContainer.appendChild(chip);
+        });
+        document.getElementById('createWalletForm').style.display = 'none';
+        document.getElementById('seedPhrasePanel').style.display = 'block';
         showResult(data);
-        alert('Wallet creada. Guarda tu frase semilla.');
-        showWalletPanel(data.wallet);
       } catch (err) {
         showResult({ error: err.message }, true);
       } finally {
@@ -717,7 +917,53 @@
       }
     });
 
-    function showWalletPanel(wallet) {
+    document.getElementById('confirmSeedBtn').addEventListener('click', async () => {
+      const raw = document.getElementById('loginSeedPhrase')?.value?.trim();
+      const pin = document.getElementById('loginPin')?.value?.trim();
+      document.getElementById('seedPhrasePanel').style.display = 'none';
+      if (raw && pin) {
+        const seedPhrase = raw.split(/\s+/);
+        try {
+          const res = await fetch(`${API_BASE}/api/wallet/authenticate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ seedPhrase, pinCode: pin }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Error al autenticar');
+          showWalletPanel(data.wallet);
+          return;
+        } catch (err) {
+          showResult({ error: err.message }, true);
+        }
+      }
+      document.getElementById('loginForm').style.display = 'flex';
+    });
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const raw = document.getElementById('loginSeedPhrase').value.trim();
+      const pin = document.getElementById('loginPin').value.trim();
+      if (!raw || !pin) return;
+      const seedPhrase = raw.split(/\s+/);
+      try {
+        const res = await fetch(`${API_BASE}/api/wallet/authenticate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ seedPhrase, pinCode: pin }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Error al autenticar');
+        showWalletPanel(data.wallet);
+      } catch (err) {
+        showResult({ error: err.message }, true);
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      lockSession();
+    });
+
+    function showWalletPanel(wallet, isAuto = false) {
       document.getElementById('authForms').style.display = 'none';
       const panel = document.getElementById('walletPanel');
       panel.style.display = 'block';
@@ -725,8 +971,18 @@
       document.getElementById('walletAddress').textContent = wallet.address || wallet.walletAddress || '';
       document.getElementById('walletBalance').textContent = wallet.balance ?? 0;
       document.getElementById('walletAvatar').textContent = '👤';
+      if (!isAuto) startSession(wallet);
+      else {
+        const session = loadSession();
+        if (session) startSession(session);
+      }
       checkApiHealth();
     }
+
+    (function initSession() {
+      attachInactivityListeners();
+      tryAutoLogin();
+    })();
 
     async function minarBloque() {
       const btn = document.querySelector('button[onclick="minarBloque()"]');
