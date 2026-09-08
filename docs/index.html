@@ -347,13 +347,16 @@
   </style>
 </head>
 <body>
+  <!-- Barra de sesión fija en la parte superior -->
+  <div id="sessionBar"></div>
+
   <header>
     <h1>AdesGold Blockchain</h1>
     <p>Blockchain Soberana con Consenso PoDT y Privacidad Post-Cuántica</p>
     <p style="margin-top: 0.5rem; font-size: 0.9rem;">Token nativo: ADG | Suministro total: 100,000,000</p>
   </header>
 
-  <section class="hero">
+  <section class="hero" id="publicHero">
     <h2>La blockchain del futuro con resistencia cuántica</h2>
     <p>
       AdesGold implementa el <strong>consenso PoDT (Proof of Digital Trust)</strong>, un algoritmo de consenso
@@ -782,12 +785,18 @@
       if (publicHero) publicHero.style.display = 'block';
       if (sessionPanel) sessionPanel.style.display = 'none';
       if (bar) { bar.style.width = '100%'; bar.classList.remove('warning', 'danger'); }
-      document.getElementById('resultBox').style.display = 'none';
-      document.getElementById('seedPhrasePanel').style.display = 'none';
-      document.getElementById('recoverForm').style.display = 'none';
-      document.getElementById('recoverResetForm').style.display = 'none';
-      document.getElementById('createWalletForm').style.display = 'flex';
-      document.getElementById('loginForm').style.display = 'none';
+      const resultBox = document.getElementById('resultBox');
+      const seedPanel = document.getElementById('seedPhrasePanel');
+      const recoverFormEl = document.getElementById('recoverForm');
+      const recoverResetEl = document.getElementById('recoverResetForm');
+      const createForm = document.getElementById('createWalletForm');
+      const loginForm = document.getElementById('loginForm');
+      if (resultBox) resultBox.style.display = 'none';
+      if (seedPanel) seedPanel.style.display = 'none';
+      if (recoverFormEl) recoverFormEl.style.display = 'none';
+      if (recoverResetEl) recoverResetEl.style.display = 'none';
+      if (createForm) createForm.style.display = 'flex';
+      if (loginForm) loginForm.style.display = 'none';
     }
 
     function showLanding() {
@@ -1058,17 +1067,24 @@
     }
 
     function showWalletPanel(wallet, isAuto = false) {
-      document.getElementById('authForms').style.display = 'none';
-      document.getElementById('authArea').style.display = 'none';
-      document.getElementById('publicHero').style.display = 'none';
+      const authForms = document.getElementById('authForms');
+      const authArea = document.getElementById('authArea');
+      const publicHero = document.getElementById('publicHero');
       const panel = document.getElementById('walletPanel');
-      panel.style.display = 'block';
+      if (authForms) authForms.style.display = 'none';
+      if (authArea) authArea.style.display = 'none';
+      if (publicHero) publicHero.style.display = 'none';
+      if (panel) panel.style.display = 'block';
       const sessionPanel = document.getElementById('sessionPanel');
       if (sessionPanel) sessionPanel.style.display = 'flex';
-      document.getElementById('walletUsername').textContent = wallet.username || 'Usuario';
-      document.getElementById('walletAddress').textContent = wallet.address || wallet.walletAddress || '';
-      document.getElementById('walletBalance').textContent = wallet.balance ?? 0;
-      document.getElementById('walletAvatar').textContent = '👤';
+      const walletUsername = document.getElementById('walletUsername');
+      const walletAddress = document.getElementById('walletAddress');
+      const walletBalance = document.getElementById('walletBalance');
+      const walletAvatar = document.getElementById('walletAvatar');
+      if (walletUsername) walletUsername.textContent = wallet.username || 'Usuario';
+      if (walletAddress) walletAddress.textContent = wallet.address || wallet.walletAddress || '';
+      if (walletBalance) walletBalance.textContent = wallet.balance ?? 0;
+      if (walletAvatar) walletAvatar.textContent = '👤';
       if (!isAuto) startSession(wallet);
       else {
         const session = loadSession();
