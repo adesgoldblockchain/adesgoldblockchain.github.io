@@ -1346,8 +1346,8 @@ async function importContacts() {
       _callFormEl.addEventListener('submit', async (e) => {
         e.preventDefault();
         hideResult();
-        const btn = document.getElementById('callBtn');
-        const status = document.getElementById('callStatus');
+        const btn = $el('callBtn');
+        const status = $el('callStatus');
         if (btn) { btn.disabled = true; btn.textContent = 'Llamando...'; }
         if (status) { status.style.display = 'block'; status.textContent = 'Estableciendo cifrado híbrido X25519 + ML-KEM-768...'; }
         try {
