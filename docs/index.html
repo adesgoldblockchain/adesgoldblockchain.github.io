@@ -297,6 +297,81 @@
     }
     .mining-fill-pulse { animation: fillPulse 0.8s ease-in-out infinite; }
 
+    .secure-field {
+      position: relative;
+    }
+    .secure-field input, .secure-field textarea {
+      width: 100%;
+      padding: 0.75rem 2.4rem 0.75rem 0.75rem;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: 1rem;
+      outline: none;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+    }
+    .secure-toggle {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+    .secure-overlay {
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(45deg, rgba(15,23,42,0.85), rgba(15,23,42,0.85) 10px, rgba(30,41,59,0.85) 10px, rgba(30,41,59,0.85) 20px);
+      z-index: 99999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    .secure-overlay.active { display: flex; }
+    .secure-overlay .lock-box {
+      background: rgba(15,23,42,0.95);
+      border: 1px solid #ef4444;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 0 40px rgba(239,68,68,0.35);
+    }
+    .secure-overlay .lock-title {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #fbbf24;
+      margin-bottom: 10px;
+    }
+    .secure-overlay .lock-text {
+      color: #93c5fd;
+      margin-bottom: 14px;
+    }
+    .secure-overlay input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    .secure-overlay button {
+      width: 100%;
+    }
+
     #sessionBar {
       position: fixed;
       top: 0;
@@ -374,14 +449,20 @@
       <form id="createWalletForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
         <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Crear Wallet Maestra</h3>
         <input type="text" id="createUsername" placeholder="Usuario (3-20 caracteres)" required minlength="3" maxlength="20" class="input-field" />
-        <input type="text" id="createPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
+        <div class="secure-field">
+          <input type="password" id="createPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
+          <button type="button" class="secure-toggle" onclick="toggleSecure(this)">🙈</button>
+        </div>
         <button type="submit" class="btn" id="createWalletBtn">Crear Wallet</button>
       </form>
 
       <form id="loginForm" style="display: none; flex-direction: column; gap: 0.75rem;">
         <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Iniciar Sesión</h3>
         <input type="text" id="loginUsername" placeholder="Usuario" required class="input-field" />
-        <input type="text" id="loginPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
+        <div class="secure-field">
+          <input type="password" id="loginPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
+          <button type="button" class="secure-toggle" onclick="toggleSecure(this)">🙈</button>
+        </div>
         <button type="button" class="btn" id="loginBtn">Entrar</button>
       </form>
     </div>
@@ -396,7 +477,10 @@
     <div id="recoverForm" style="display: none; flex-direction: column; gap: 0.75rem;">
       <h3 style="color: #fbbf24; margin-bottom: 8px; text-align: center;">Recuperar Wallet</h3>
       <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin-bottom: 10px;">Ingresa tus 12 palabras para recuperar tu cuenta.</p>
-      <textarea id="recoverSeedPhrase" placeholder="Escribe las 12 palabras separadas por espacio" required class="input-field" rows="3"></textarea>
+      <div class="secure-field">
+        <textarea id="recoverSeedPhrase" placeholder="Escribe las 12 palabras separadas por espacio" required class="input-field" rows="3" style="padding-right: 2.4rem;"></textarea>
+        <button type="button" class="secure-toggle" style="top: 14px;" onclick="toggleSecure(this)">🙈</button>
+      </div>
       <button type="button" class="btn" id="recoverNextBtn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000;">Continuar</button>
     </div>
 
@@ -404,12 +488,22 @@
       <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Configurar acceso</h3>
       <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin-bottom: 10px;">Elige un nuevo nombre de usuario y PIN. La cuenta quedará unida a tus 12 palabras.</p>
       <input type="text" id="recoverUsername" placeholder="Nombre de usuario (3-20 caracteres)" required minlength="3" maxlength="20" class="input-field" />
-      <input type="text" id="recoverPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
+      <div class="secure-field">
+        <input type="password" id="recoverPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
+        <button type="button" class="secure-toggle" onclick="toggleSecure(this)">🙈</button>
+      </div>
       <button type="button" class="btn" id="recoverConfirmBtn">Recuperar y entrar</button>
     </div>
   </div>
 
-  <div id="sessionBar"></div>
+  <div id="secureOverlay" class="secure-overlay">
+    <div class="lock-box">
+      <div class="lock-title">🔒 Modo seguro activo</div>
+      <div class="lock-text">Área protegida. Toca aquí para continuar.</div>
+      <input type="password" id="secureUnlock" placeholder="Confirma tu PIN para continuar" />
+      <button class="btn" id="secureUnlockBtn">Desbloquear vista</button>
+    </div>
+  </div>
   <div id="sessionPanel" class="session-panel" style="display: none;">
     <div class="dot"></div>
     <div>
@@ -439,69 +533,7 @@
     </div>
   </section>
 
-  <section class="wallet-section">
-    <h2>Wallets Activas - AdesGold</h2>
-    <div class="wallet-grid">
-      <div class="wallet-card">
-        <h4>Master Wallet</h4>
-        <div class="balance">30,000,000 ADG</div>
-        <div class="address">tudor1treasury000000000000000000000000q3k8la</div>
-        <button onclick="alert('Master Wallet: 30% del suministro total')">Ver Detalles</button>
-      </div>
-      <div class="wallet-card">
-        <h4>Ecosystem Wallet</h4>
-        <div class="balance">70,000,000 ADG</div>
-        <div class="address">tudor1ecosyste00000000000000000000000000000000ea</div>
-        <button onclick="alert('Ecosystem Wallet: 70% del suministro total')">Ver Detalles</button>
-      </div>
-      <div class="wallet-card">
-        <h4>Faucet Wallet</h4>
-        <div class="balance">1,000,000 ADG</div>
-        <div class="address">tudor1faucet000000000000000000000000007v3wep</div>
-        <button onclick="alert('Faucet Wallet: Fondos de prueba')">Ver Detalles</button>
-      </div>
-    </div>
-    <div class="stat-row">
-      <div class="stat-box">
-        <div class="label">Suministro Total</div>
-        <div class="value">100,000,000</div>
-      </div>
-      <div class="stat-box">
-        <div class="label">Master Wallets</div>
-        <div class="value">30%</div>
-      </div>
-      <div class="stat-box">
-        <div class="label">Ecosistema</div>
-        <div class="value">70%</div>
-      </div>
-      <div class="stat-box">
-        <div class="label">Recompensa Minero</div>
-        <div class="value">49%</div>
-      </div>
-      <div class="stat-box">
-        <div class="label">Recompensa Tesoro</div>
-        <div class="value">51%</div>
-      </div>
-    </div>
-   </section>
-
-   <div id="masterWalletCard" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); border: 1px solid #3b82f6; border-radius: 16px; padding: 16px 20px; margin-bottom: 1.5rem;">
-     <div style="display: flex; align-items: center; gap: 14px;">
-       <div style="font-size: 32px;">👑</div>
-       <div>
-         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-           <span style="font-weight: 800; color: #fbbf24;">📋 Cuenta Madre (Master Wallet)</span>
-           <span class="badge badge-green">Activa</span>
-         </div>
-         <div style="font-size: 0.85rem; color: #93c5fd; font-family: monospace;">Usuario: elidep</div>
-         <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
-           🔐 Código PIN y 12 frases de recuperación → <span style="color: #34d399;">documentos seguros</span>
-         </div>
-       </div>
-     </div>
-   </div>
-
-   <section class="interactive-panel">
+  <section class="interactive-panel">
     <h2>AdesGold Wallet</h2>
     <div style="text-align: center; margin-bottom: 1.5rem;">
       <span id="statusDot" class="status-dot status-checking"></span>
@@ -771,6 +803,60 @@
         toggle.textContent = '▶';
       }
     }
+
+    function toggleSecure(btn) {
+      const field = btn.parentElement.querySelector('input, textarea');
+      if (!field) return;
+      const isPassword = field.type === 'password';
+      field.type = isPassword ? 'text' : 'password';
+      btn.textContent = isPassword ? '🙉' : '🙈';
+    }
+
+    function activateSecureOverlay() {
+      const overlay = document.getElementById('secureOverlay');
+      const unlock = document.getElementById('secureUnlock');
+      if (!overlay) return;
+      overlay.classList.add('active');
+      if (unlock) { unlock.value = ''; unlock.focus(); }
+    }
+
+    function deactivateSecureOverlay() {
+      const overlay = document.getElementById('secureOverlay');
+      if (overlay) overlay.classList.remove('active');
+    }
+
+    function setupSecureOverlay() {
+      const sensitiveIds = ['createPin', 'loginPin', 'recoverSeedPhrase', 'recoverPin', 'loginUsername', 'createUsername', 'recoverUsername'];
+      const overlay = document.getElementById('secureOverlay');
+      const unlockBtn = document.getElementById('secureUnlockBtn');
+      const unlockInput = document.getElementById('secureUnlock');
+      if (!overlay) return;
+
+      const hideOverlayFor = () => overlay.classList.remove('active');
+      const showOverlayAgain = () => {
+        if (!overlay.classList.contains('active')) activateSecureOverlay();
+      };
+
+      sensitiveIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('focus', hideOverlayFor);
+        el.addEventListener('blur', () => setTimeout(showOverlayAgain, 120));
+      });
+
+      if (unlockBtn && unlockInput) {
+        unlockBtn.addEventListener('click', () => {
+          const pin = unlockInput.value.trim();
+          if (!pin) return hideOverlayFor();
+          const stored = (() => { try { const raw = localStorage.getItem('adesgold_session_v1'); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } })();
+          if (stored && stored.pinCode && pin === stored.pinCode) return hideOverlayFor();
+          unlockInput.value = '';
+          alert('PIN incorrecto');
+        });
+      }
+    }
+
+    setupSecureOverlay();
 
     async function checkApiHealth() {
       const dot = document.getElementById('statusDot');
