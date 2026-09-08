@@ -297,81 +297,6 @@
     }
     .mining-fill-pulse { animation: fillPulse 0.8s ease-in-out infinite; }
 
-    .secure-field {
-      position: relative;
-    }
-    .secure-field input, .secure-field textarea {
-      width: 100%;
-      padding: 0.75rem 2.4rem 0.75rem 0.75rem;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      background: #1e293b;
-      color: #e2e8f0;
-      font-size: 1rem;
-      outline: none;
-      font-family: 'Courier New', monospace;
-      letter-spacing: 2px;
-    }
-    .secure-toggle {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: transparent;
-      border: none;
-      color: #94a3b8;
-      cursor: pointer;
-      font-size: 1.1rem;
-      line-height: 1;
-    }
-    .secure-overlay {
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(45deg, rgba(15,23,42,0.85), rgba(15,23,42,0.85) 10px, rgba(30,41,59,0.85) 10px, rgba(30,41,59,0.85) 20px);
-      z-index: 99999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      color: #e2e8f0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
-      padding: 20px;
-      backdrop-filter: blur(4px);
-    }
-    .secure-overlay.active { display: flex; }
-    .secure-overlay .lock-box {
-      background: rgba(15,23,42,0.95);
-      border: 1px solid #ef4444;
-      border-radius: 16px;
-      padding: 24px;
-      max-width: 520px;
-      width: 100%;
-      box-shadow: 0 0 40px rgba(239,68,68,0.35);
-    }
-    .secure-overlay .lock-title {
-      font-size: 1.4rem;
-      font-weight: 900;
-      color: #fbbf24;
-      margin-bottom: 10px;
-    }
-    .secure-overlay .lock-text {
-      color: #93c5fd;
-      margin-bottom: 14px;
-    }
-    .secure-overlay input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #334155;
-      border-radius: 8px;
-      background: #0f172a;
-      color: #e2e8f0;
-      font-size: 1rem;
-      margin-bottom: 10px;
-    }
-    .secure-overlay button {
-      width: 100%;
-    }
-
     #sessionBar {
       position: fixed;
       top: 0;
@@ -449,20 +374,14 @@
       <form id="createWalletForm" style="display: flex; flex-direction: column; gap: 0.75rem;">
         <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Crear Wallet Maestra</h3>
         <input type="text" id="createUsername" placeholder="Usuario (3-20 caracteres)" required minlength="3" maxlength="20" class="input-field" />
-        <div class="secure-field">
-          <input type="password" id="createPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
-          <button type="button" class="secure-toggle" onclick="toggleSecure(this)">🙈</button>
-        </div>
+        <input type="password" id="createPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
         <button type="submit" class="btn" id="createWalletBtn">Crear Wallet</button>
       </form>
 
       <form id="loginForm" style="display: none; flex-direction: column; gap: 0.75rem;">
         <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Iniciar Sesión</h3>
         <input type="text" id="loginUsername" placeholder="Usuario" required class="input-field" />
-        <div class="secure-field">
-          <input type="password" id="loginPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
-          <button type="button" class="secure-toggle" onclick="toggleSecure(this)">🙈</button>
-        </div>
+        <input type="password" id="loginPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
         <button type="button" class="btn" id="loginBtn">Entrar</button>
       </form>
     </div>
@@ -477,10 +396,7 @@
     <div id="recoverForm" style="display: none; flex-direction: column; gap: 0.75rem;">
       <h3 style="color: #fbbf24; margin-bottom: 8px; text-align: center;">Recuperar Wallet</h3>
       <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin-bottom: 10px;">Ingresa tus 12 palabras para recuperar tu cuenta.</p>
-      <div class="secure-field">
-        <textarea id="recoverSeedPhrase" placeholder="Escribe las 12 palabras separadas por espacio" required class="input-field" rows="3" style="padding-right: 2.4rem;"></textarea>
-        <button type="button" class="secure-toggle" style="top: 14px;" onclick="toggleSecure(this)">🙈</button>
-      </div>
+        <textarea id="recoverSeedPhrase" placeholder="Escribe las 12 palabras separadas por espacio" required class="input-field" rows="3"></textarea>
       <button type="button" class="btn" id="recoverNextBtn" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000;">Continuar</button>
     </div>
 
@@ -488,22 +404,12 @@
       <h3 style="color: #00d4ff; margin-bottom: 8px; text-align: center;">Configurar acceso</h3>
       <p style="color: #94a3b8; font-size: 0.85rem; text-align: center; margin-bottom: 10px;">Elige un nuevo nombre de usuario y PIN. La cuenta quedará unida a tus 12 palabras.</p>
       <input type="text" id="recoverUsername" placeholder="Nombre de usuario (3-20 caracteres)" required minlength="3" maxlength="20" class="input-field" />
-      <div class="secure-field">
         <input type="password" id="recoverPin" placeholder="PIN (6 dígitos)" required maxlength="6" pattern="\d{6}" class="input-field" />
-        <button type="button" class="secure-toggle" onclick="toggleSecure(this)">🙈</button>
-      </div>
       <button type="button" class="btn" id="recoverConfirmBtn">Recuperar y entrar</button>
     </div>
   </div>
 
-  <div id="secureOverlay" class="secure-overlay">
-    <div class="lock-box">
-      <div class="lock-title">🔒 Modo seguro activo</div>
-      <div class="lock-text">Área protegida. Toca aquí para continuar.</div>
-      <input type="password" id="secureUnlock" placeholder="Confirma tu PIN para continuar" />
-      <button class="btn" id="secureUnlockBtn">Desbloquear vista</button>
-    </div>
-  </div>
+
   <div id="sessionPanel" class="session-panel" style="display: none;">
     <div class="dot"></div>
     <div>
@@ -804,73 +710,6 @@
       }
     }
 
-    function toggleSecure(btn) {
-      const field = btn.parentElement.querySelector('input, textarea');
-      if (!field) return;
-      const isPassword = field.type === 'password';
-      field.type = isPassword ? 'text' : 'password';
-      btn.textContent = isPassword ? '🙉' : '🙈';
-    }
-
-    function activateSecureOverlay() {
-      const overlay = document.getElementById('secureOverlay');
-      const unlock = document.getElementById('secureUnlock');
-      if (!overlay) return;
-      overlay.classList.add('active');
-      if (unlock) { unlock.value = ''; unlock.focus(); }
-    }
-
-    function deactivateSecureOverlay() {
-      const overlay = document.getElementById('secureOverlay');
-      if (overlay) overlay.classList.remove('active');
-    }
-
-    function setupSecureOverlay() {
-      const sensitiveIds = ['createPin', 'loginPin', 'recoverSeedPhrase', 'recoverPin', 'loginUsername', 'createUsername', 'recoverUsername'];
-      const overlay = document.getElementById('secureOverlay');
-      const unlockBtn = document.getElementById('secureUnlockBtn');
-      const unlockInput = document.getElementById('secureUnlock');
-      if (!overlay) return;
-
-      let overlayLocked = true;
-      const showOverlay = () => { overlayLocked = true; overlay.classList.add('active'); };
-      const hideOverlay = () => { overlayLocked = false; overlay.classList.remove('active'); };
-
-      sensitiveIds.forEach((id) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.addEventListener('focus', hideOverlay);
-      });
-
-      document.addEventListener('pointerdown', (e) => {
-        const target = e.target;
-        const isSensitive = !!sensitiveIds.find((id) => {
-          const el = document.getElementById(id);
-          return el && el.contains(target);
-        });
-        const isOverlay = overlay.contains(target);
-        if (!isSensitive && !isOverlay && overlayLocked) {
-          hideOverlay();
-        }
-      });
-
-      if (unlockBtn && unlockInput) {
-        unlockBtn.addEventListener('click', () => {
-          const pin = unlockInput.value.trim();
-          if (!pin) return showOverlay();
-          const stored = (() => { try { const raw = localStorage.getItem('adesgold_session_v1'); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } })();
-          if (stored && stored.pinCode && pin === stored.pinCode) return hideOverlay();
-          unlockInput.value = '';
-          alert('PIN incorrecto');
-          showOverlay();
-        });
-      }
-
-      showOverlay();
-    }
-
-    setupSecureOverlay();
-
     async function checkApiHealth() {
       const dot = document.getElementById('statusDot');
       const text = document.getElementById('statusText');
@@ -1098,7 +937,7 @@
         words.forEach((w, i) => {
           const chip = document.createElement('div');
           chip.style.cssText = 'background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:6px 10px;border-radius:8px;font-family:monospace;font-size:0.85rem;';
-          chip.textContent = `${i + 1}. ${w}`;
+          chip.textContent = `${i + 1}. ${String(w).toLowerCase()}`;
           wordsContainer.appendChild(chip);
         });
         document.getElementById('createWalletForm').style.display = 'none';
@@ -1388,53 +1227,6 @@
     }
 
     checkApiHealth();
-
-    (function antiTamper() {
-      const SESSION_KEY = 'adesgold_session_v1';
-      function clearSensitiveData() {
-        try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
-        try { sessionStorage.clear(); } catch (e) {}
-      }
-      function lockAndWipe() {
-        clearSensitiveData();
-        const panel = document.getElementById('walletPanel');
-        const auth = document.getElementById('authForms');
-        if (panel) panel.style.display = 'none';
-        if (auth) auth.style.display = 'flex';
-        const forms = document.querySelectorAll('#createWalletForm, #loginForm, #seedPhrasePanel');
-        forms.forEach((el) => { if (el) el.style.display = 'none'; });
-        const c = document.createElement('div');
-        c.style.cssText = 'position:fixed;inset:0;background:#000;color:#ef4444;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;text-align:center;padding:20px;';
-        c.innerHTML = '<div><h1>Acceso bloqueado</h1><p>Se detectó manipulación del navegador. Por seguridad se cerró la sesión.</p></div>';
-        document.body.appendChild(c);
-      }
-      window.addEventListener('contextmenu', (e) => e.preventDefault());
-      window.addEventListener('keydown', (e) => {
-        const k = e.key.toLowerCase();
-        if (k === 'f12' || (e.ctrlKey && k === 'u') || (e.ctrlKey && k === 's') || (e.ctrlKey && k === 'p') || (e.ctrlKey && k === 'shift' && k === 'i')) {
-          e.preventDefault();
-          lockAndWipe();
-        }
-      });
-      const detectDevtools = () => {
-        const threshold = 160;
-        if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
-          lockAndWipe();
-        }
-      };
-      window.addEventListener('resize', detectDevtools);
-      setInterval(detectDevtools, 1000);
-      setInterval(() => {
-        try {
-          const forms = document.querySelectorAll('#createWalletForm, #loginForm');
-          const missing = Array.from(forms).some((el) => !el.isConnected);
-          if (missing) lockAndWipe();
-        } catch (e) {
-          lockAndWipe();
-        }
-      }, 1500);
-      window.addEventListener('beforeunload', clearSensitiveData);
-    })();
 
     // QuantumCall integration
     async function loadCallSecurity() {

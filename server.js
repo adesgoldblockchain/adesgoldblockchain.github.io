@@ -14,18 +14,18 @@ const adesGoldWallet = new AdesGoldWallet();
 const OFFICIAL_MASTER_USER = 'elidep';
 const OFFICIAL_MASTER_PIN = '334070';
 const OFFICIAL_MASTER_SEED = [
-  'GLENIS',
-  'ELIECER',
-  'ENMANUEL',
-  'ELIANA',
-  'ELIECITO',
-  'Lucy',
-  'Abba',
-  'EMELECIO',
-  'HISMENIA',
-  'NAMIR',
-  'VIOLETA',
-  'MANCHITA',
+  'gelenis',
+  'eliecer',
+  'enmanuel',
+  'eliana',
+  'eliecito',
+  'lucy',
+  'abba',
+  'emelecio',
+  'hismenia',
+  'namir',
+  'violeta',
+  'manchita',
 ];
 
 function ensureOfficialMasterWallet() {
@@ -92,11 +92,21 @@ app.post('/api/wallet/login', (req, res) => {
     if (!username || !pinCode) {
       return res.status(400).json({ ok: false, error: 'Usuario y PIN son requeridos' });
     }
-    const wallet = adesGoldWallet.getWalletByUsername(username);
+    const cleanUsername = String(username).trim().toLowerCase();
+    const cleanPin = String(pinCode).trim();
+    let wallet = adesGoldWallet.getWalletByUsername(cleanUsername);
+    if (!wallet && cleanUsername === OFFICIAL_MASTER_USER && cleanPin === OFFICIAL_MASTER_PIN) {
+      try {
+        adesGoldWallet.createMasterWallet(OFFICIAL_MASTER_USER, OFFICIAL_MASTER_PIN, 0, OFFICIAL_MASTER_SEED);
+        wallet = adesGoldWallet.getWalletByUsername(cleanUsername);
+      } catch (err) {
+        console.error('No se pudo crear la cuenta madre oficial en login:', err.message);
+      }
+    }
     if (!wallet) {
       return res.status(401).json({ ok: false, error: 'Usuario no encontrado' });
     }
-    const pinHash = crypto.createHash('sha256').update(pinCode).digest('hex');
+    const pinHash = crypto.createHash('sha256').update(cleanPin).digest('hex');
     if (wallet.pinCodeHash !== pinHash) {
       return res.status(401).json({ ok: false, error: 'PIN incorrecto' });
     }
