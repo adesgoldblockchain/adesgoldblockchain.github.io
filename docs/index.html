@@ -1113,6 +1113,7 @@
 
     async function minarBloque() {
       const btn = document.querySelector('button[onclick="minarBloque()"]');
+      if (!btn) return;
       const originalText = btn.innerHTML;
       btn.disabled = true;
       btn.innerHTML = '<span style="font-size: 24px;">⛏️</span><span style="font-size: 11px; font-weight: 700;">Minando...</span>';
@@ -1136,14 +1137,13 @@
         progress = Math.min(100, Math.round((elapsed / duration) * 100));
         if (bar) bar.style.width = progress + '%';
         if (percent) percent.textContent = progress + '%';
-        if (progress < 100) {
-          requestAnimationFrame(animate);
-        }
+        if (progress < 100) requestAnimationFrame(animate);
       };
       requestAnimationFrame(animate);
 
       try {
-        const sender = document.getElementById('walletAddress').textContent;
+        const addrEl = document.getElementById('walletAddress');
+        const sender = addrEl ? addrEl.textContent : '';
         const res = await fetch(`${API_BASE}/api/wallet/mine`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1163,11 +1163,16 @@
 
         if (blockCard) {
           blockCard.style.display = 'block';
-          document.getElementById('blockNumberBadge').textContent = '#' + blockNumber;
-          document.getElementById('blockHash').textContent = blockHash;
-          document.getElementById('blockReward').textContent = (Number(reward) || 0) + ' ADG';
-          document.getElementById('blockTimestamp').textContent = new Date().toLocaleString();
-          document.getElementById('blockTxCount').textContent = data.transactionCount ?? (data.transactions ? data.transactions.length : '0');
+          const badge = document.getElementById('blockNumberBadge');
+          const hashEl = document.getElementById('blockHash');
+          const rewardEl = document.getElementById('blockReward');
+          const tsEl = document.getElementById('blockTimestamp');
+          const txEl = document.getElementById('blockTxCount');
+          if (badge) badge.textContent = '#' + blockNumber;
+          if (hashEl) hashEl.textContent = blockHash;
+          if (rewardEl) rewardEl.textContent = (Number(reward) || 0) + ' ADG';
+          if (tsEl) tsEl.textContent = new Date().toLocaleString();
+          if (txEl) txEl.textContent = data.transactionCount ?? (data.transactions ? data.transactions.length : '0');
           spawnConfetti(blockCard);
         }
 
@@ -1203,20 +1208,28 @@
     }
 
     function mostrarEnviar() {
-      document.getElementById('swapForm').style.display = 'none';
-      document.getElementById('sendForm').style.display = 'block';
+      const sf = document.getElementById('swapForm');
+      const ef = document.getElementById('sendForm');
+      if (sf) sf.style.display = 'none';
+      if (ef) ef.style.display = 'block';
     }
 
     function mostrarSwap() {
-      document.getElementById('sendForm').style.display = 'none';
-      document.getElementById('swapForm').style.display = 'block';
+      const ef = document.getElementById('sendForm');
+      const sf = document.getElementById('swapForm');
+      if (ef) ef.style.display = 'none';
+      if (sf) sf.style.display = 'block';
     }
 
     async function enviarADG() {
       try {
-        const sender = document.getElementById('walletAddress').textContent;
-        const recipient = document.getElementById('sendTo').value.trim();
-        const amount = parseFloat(document.getElementById('sendAmount').value);
+        const addrEl = document.getElementById('walletAddress');
+        const sendToEl = document.getElementById('sendTo');
+        const sendAmtEl = document.getElementById('sendAmount');
+        const sendFormEl = document.getElementById('sendForm');
+        const sender = addrEl ? addrEl.textContent : '';
+        const recipient = sendToEl ? sendToEl.value.trim() : '';
+        const amount = parseFloat(sendAmtEl ? sendAmtEl.value : '');
         if (!recipient || isNaN(amount) || amount <= 0) throw new Error('Datos de envío inválidos');
         const res = await fetch(`${API_BASE}/api/wallet/send`, {
           method: 'POST',
@@ -1226,7 +1239,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al enviar');
         showResult(data);
-        document.getElementById('sendForm').style.display = 'none';
+        if (sendFormEl) sendFormEl.style.display = 'none';
       } catch (err) {
         showResult({ error: err.message }, true);
       }
@@ -1234,10 +1247,15 @@
 
     async function hacerSwap() {
       try {
-        const sender = document.getElementById('walletAddress').textContent;
-        const from = document.getElementById('swapFrom').value;
-        const to = document.getElementById('swapTo').value;
-        const amount = parseFloat(document.getElementById('swapAmount').value);
+        const addrEl = document.getElementById('walletAddress');
+        const fromEl = document.getElementById('swapFrom');
+        const toEl = document.getElementById('swapTo');
+        const amtEl = document.getElementById('swapAmount');
+        const swapFormEl = document.getElementById('swapForm');
+        const sender = addrEl ? addrEl.textContent : '';
+        const from = fromEl ? fromEl.value : '';
+        const to = toEl ? toEl.value : '';
+        const amount = parseFloat(amtEl ? amtEl.value : '');
         if (!sender || !sender.trim()) throw new Error('Necesitas crear una wallet primero');
         if (from === to) throw new Error('Selecciona tokens diferentes');
         if (isNaN(amount) || amount <= 0) throw new Error('Cantidad inválida');
@@ -1249,7 +1267,7 @@
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error en swap');
         showResult(data);
-        document.getElementById('swapForm').style.display = 'none';
+        if (swapFormEl) swapFormEl.style.display = 'none';
       } catch (err) {
         showResult({ error: err.message }, true);
       }
@@ -1259,11 +1277,12 @@
 
     // QuantumCall integration
     async function loadCallSecurity() {
+      const box = document.getElementById('callSecurity');
+      if (!box) return;
       try {
         const res = await fetch(`${API_BASE}/api/call/security`);
         const data = await res.json();
         if (res.ok) {
-          const box = document.getElementById('callSecurity');
           box.innerHTML = `
             <div style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px;">
               <div style="font-weight: 800; margin-bottom: 4px;">Cifrado E2E híbrido</div>
@@ -1283,43 +1302,43 @@
             </div>
           `;
         } else {
-          document.getElementById('callSecurity').innerHTML = '<div>Error cargando seguridad</div>';
+          box.innerHTML = '<div>Error cargando seguridad</div>';
         }
       } catch (err) {
-        document.getElementById('callSecurity').innerHTML = '<div>Sin conexión al API de llamadas</div>';
+        box.innerHTML = '<div>Sin conexión al API de llamadas</div>';
       }
     }
 
-    document.getElementById('callForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideResult();
-      const btn = document.getElementById('callBtn');
-      const status = document.getElementById('callStatus');
-      btn.disabled = true;
-      btn.textContent = 'Llamando...';
-      status.style.display = 'block';
-      status.textContent = 'Estableciendo cifrado híbrido X25519 + ML-KEM-768...';
-      try {
-        const calleeAddress = document.getElementById('callTarget').value;
-        const type = document.getElementById('callType').value;
-        const transport = document.getElementById('callTransport').value;
-        const res = await fetch(`${API_BASE}/api/call/initiate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ callerAddress: 'local', calleeAddress, type, transport }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Error en llamada');
-        showResult(data);
-        status.textContent = `Llamada ${type} iniciada • Transporte: ${transport} • Cifrado activo`;
-      } catch (err) {
-        status.textContent = 'Error: ' + err.message;
-        showResult({ error: err.message }, true);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '📞 Iniciar llamada';
-      }
-    });
+    const _callFormEl = document.getElementById('callForm');
+    if (_callFormEl) {
+      _callFormEl.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideResult();
+        const btn = document.getElementById('callBtn');
+        const status = document.getElementById('callStatus');
+        if (btn) { btn.disabled = true; btn.textContent = 'Llamando...'; }
+        if (status) { status.style.display = 'block'; status.textContent = 'Estableciendo cifrado híbrido X25519 + ML-KEM-768...'; }
+        try {
+          const calleeAddress = (document.getElementById('callTarget') || {}).value || '';
+          const type = (document.getElementById('callType') || {}).value || 'audio';
+          const transport = (document.getElementById('callTransport') || {}).value || 'direct';
+          const res = await fetch(`${API_BASE}/api/call/initiate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ callerAddress: 'local', calleeAddress, type, transport }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Error en llamada');
+          showResult(data);
+          if (status) status.textContent = `Llamada ${type} iniciada • Transporte: ${transport} • Cifrado activo`;
+        } catch (err) {
+          if (status) status.textContent = 'Error: ' + err.message;
+          showResult({ error: err.message }, true);
+        } finally {
+          if (btn) { btn.disabled = false; btn.textContent = '📞 Iniciar llamada'; }
+        }
+      });
+    }
 
     loadCallSecurity();
   </script>
