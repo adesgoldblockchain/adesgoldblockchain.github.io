@@ -418,17 +418,6 @@
     <button id="logoutBtn">Cerrar sesión</button>
   </div>
 
-  <section class="hero">
-    <h2>La blockchain del futuro con resistencia cuántica</h2>
-    <p>
-      AdesGold implementa el <strong>consenso PoDT (Proof of Digital Trust)</strong>, un algoritmo de consenso
-      basado en puntuaciones de confianza y reputación de validadores. Combinado con criptografía
-      <strong>post-cuántica</strong> (firmas XMSS-SHA2) y <strong>privacidad avanzada</strong> (direcciones
-      stealth, transacciones confidenciales y firmas anónimas), AdesGold ofrece una red blockchain segura
-      contra amenazas cuánticas futuras.
-    </p>
-  </section>
-
   <section class="features">
     <div class="feature-card">
       <h3>🔐 Criptografía Post-Cuántica</h3>
@@ -865,12 +854,12 @@
       clearSession();
       const walletPanel = document.getElementById('walletPanel');
       const authArea = document.getElementById('authArea');
-      const heroAuth = document.getElementById('heroAuthButtons');
+      const publicHero = document.getElementById('publicHero');
       const sessionPanel = document.getElementById('sessionPanel');
       const bar = document.getElementById('sessionBar');
       if (walletPanel) walletPanel.style.display = 'none';
       if (authArea) authArea.style.display = 'none';
-      if (heroAuth) heroAuth.style.display = 'flex';
+      if (publicHero) publicHero.style.display = 'block';
       if (sessionPanel) sessionPanel.style.display = 'none';
       if (bar) { bar.style.width = '100%'; bar.classList.remove('warning', 'danger'); }
       document.getElementById('resultBox').style.display = 'none';
@@ -879,6 +868,43 @@
       document.getElementById('recoverResetForm').style.display = 'none';
       document.getElementById('createWalletForm').style.display = 'flex';
       document.getElementById('loginForm').style.display = 'none';
+    }
+
+    function showLanding() {
+      const authArea = document.getElementById('authArea');
+      const publicHero = document.getElementById('publicHero');
+      const createForm = document.getElementById('createWalletForm');
+      const loginForm = document.getElementById('loginForm');
+      const recoverForm = document.getElementById('recoverForm');
+      const recoverReset = document.getElementById('recoverResetForm');
+      const seedPanel = document.getElementById('seedPhrasePanel');
+      if (authArea) authArea.style.display = 'none';
+      if (publicHero) publicHero.style.display = 'block';
+      if (seedPanel) seedPanel.style.display = 'none';
+      if (createForm) createForm.style.display = 'flex';
+      if (loginForm) loginForm.style.display = 'none';
+      if (recoverForm) recoverForm.style.display = 'none';
+      if (recoverReset) recoverReset.style.display = 'none';
+    }
+
+    function showAuthView(view) {
+      const authArea = document.getElementById('authArea');
+      const publicHero = document.getElementById('publicHero');
+      const createForm = document.getElementById('createWalletForm');
+      const loginForm = document.getElementById('loginForm');
+      const recoverForm = document.getElementById('recoverForm');
+      const recoverReset = document.getElementById('recoverResetForm');
+      const seedPanel = document.getElementById('seedPhrasePanel');
+      if (publicHero) publicHero.style.display = 'none';
+      if (authArea) authArea.style.display = 'block';
+      if (seedPanel) seedPanel.style.display = 'none';
+      if (createForm) createForm.style.display = 'none';
+      if (loginForm) loginForm.style.display = 'none';
+      if (recoverForm) recoverForm.style.display = 'none';
+      if (recoverReset) recoverReset.style.display = 'none';
+      if (view === 'create' && createForm) createForm.style.display = 'flex';
+      if (view === 'login' && loginForm) loginForm.style.display = 'flex';
+      if (view === 'recover' && recoverForm) recoverForm.style.display = 'flex';
     }
 
     function formatTime(ms) {
@@ -933,7 +959,10 @@
 
     async function tryAutoLogin() {
       const session = loadSession();
-      if (!session) return false;
+      if (!session) {
+        showLanding();
+        return false;
+      }
       try {
         const res = await fetch(`${API_BASE}/api/wallet/authenticate`, {
           method: 'POST',
@@ -947,18 +976,19 @@
         }
       } catch (e) {}
       clearSession();
+      showLanding();
       return false;
     }
 
     function showAuthView(view) {
-      const heroAuth = document.getElementById('heroAuthButtons');
       const authArea = document.getElementById('authArea');
+      const publicHero = document.getElementById('publicHero');
       const createForm = document.getElementById('createWalletForm');
       const loginForm = document.getElementById('loginForm');
       const recoverForm = document.getElementById('recoverForm');
       const recoverReset = document.getElementById('recoverResetForm');
       const seedPanel = document.getElementById('seedPhrasePanel');
-      if (heroAuth) heroAuth.style.display = 'none';
+      if (publicHero) publicHero.style.display = 'none';
       if (authArea) authArea.style.display = 'block';
       if (seedPanel) seedPanel.style.display = 'none';
       if (createForm) createForm.style.display = 'none';
@@ -971,20 +1001,20 @@
     }
 
     function showLanding() {
-      const heroAuth = document.getElementById('heroAuthButtons');
       const authArea = document.getElementById('authArea');
+      const publicHero = document.getElementById('publicHero');
       const createForm = document.getElementById('createWalletForm');
       const loginForm = document.getElementById('loginForm');
       const recoverForm = document.getElementById('recoverForm');
       const recoverReset = document.getElementById('recoverResetForm');
       const seedPanel = document.getElementById('seedPhrasePanel');
-      if (heroAuth) heroAuth.style.display = 'flex';
       if (authArea) authArea.style.display = 'none';
+      if (publicHero) publicHero.style.display = 'block';
+      if (seedPanel) seedPanel.style.display = 'none';
       if (createForm) createForm.style.display = 'flex';
       if (loginForm) loginForm.style.display = 'none';
       if (recoverForm) recoverForm.style.display = 'none';
       if (recoverReset) recoverReset.style.display = 'none';
-      if (seedPanel) seedPanel.style.display = 'none';
     }
 
     document.getElementById('createWalletForm').addEventListener('submit', async (e) => {
@@ -1124,7 +1154,7 @@
     function showWalletPanel(wallet, isAuto = false) {
       document.getElementById('authForms').style.display = 'none';
       document.getElementById('authArea').style.display = 'none';
-      document.getElementById('heroAuthButtons').style.display = 'none';
+      document.getElementById('publicHero').style.display = 'none';
       const panel = document.getElementById('walletPanel');
       panel.style.display = 'block';
       document.getElementById('walletUsername').textContent = wallet.username || 'Usuario';
