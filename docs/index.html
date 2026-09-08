@@ -643,7 +643,12 @@
 
     async function minarBloque() {
       try {
-        const res = await fetch(`${API_BASE}/api/wallet/mine`, { method: 'POST' });
+        const sender = document.getElementById('walletAddress').textContent;
+        const res = await fetch(`${API_BASE}/api/wallet/mine`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ minerAddress: sender }),
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al minar');
         alert('Bloque minado: ' + JSON.stringify(data));
