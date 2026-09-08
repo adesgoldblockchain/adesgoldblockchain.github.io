@@ -126,7 +126,7 @@ export class AdesGoldWallet {
       throw new Error('El PIN debe ser un código numérico de 6 dígitos');
     }
 
-    const finalSeedPhrase = seedPhrase && seedPhrase.length === 12 ? seedPhrase.map((w) => w.toLowerCase()) : this.generateSeedPhrase(12);
+    const finalSeedPhrase = seedPhrase && seedPhrase.length === 12 ? seedPhrase : this.generateSeedPhrase(12);
     const walletAddress = this.deriveAddress(finalSeedPhrase);
 
     if (this.masterWallets.has(walletAddress)) {
@@ -178,12 +178,11 @@ export class AdesGoldWallet {
   }
 
   public authenticate(seedPhrase: string[], pinCode: string): MasterWalletData | null {
-    const normalizedSeed = seedPhrase.map((w) => String(w).toLowerCase());
-    if (!this.validateSeedPhrase(normalizedSeed) || !this.validatePinCode(pinCode)) {
+    if (!this.validateSeedPhrase(seedPhrase) || !this.validatePinCode(pinCode)) {
       return null;
     }
 
-    const walletAddress = this.deriveAddress(normalizedSeed);
+    const walletAddress = this.deriveAddress(seedPhrase);
     const wallet = this.masterWallets.get(walletAddress);
 
     if (!wallet) {
@@ -277,11 +276,10 @@ export class AdesGoldWallet {
   }
 
   public getWalletBySeedPhrase(seedPhrase: string[]): MasterWalletData | null {
-    const normalizedSeed = seedPhrase.map((w) => String(w).toLowerCase());
-    if (!this.validateSeedPhrase(normalizedSeed)) {
+    if (!this.validateSeedPhrase(seedPhrase)) {
       return null;
     }
-    const address = this.deriveAddress(normalizedSeed);
+    const address = this.deriveAddress(seedPhrase);
     const wallet = this.masterWallets.get(address);
     if (!wallet) return null;
     return this.sanitizeWallet(wallet);

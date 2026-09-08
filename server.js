@@ -14,18 +14,18 @@ const adesGoldWallet = new AdesGoldWallet();
 const OFFICIAL_MASTER_USER = 'elidep';
 const OFFICIAL_MASTER_PIN = '334070';
 const OFFICIAL_MASTER_SEED = [
-  'gelenis',
-  'eliecer',
-  'enmanuel',
-  'eliana',
-  'eliecito',
-  'lucy',
-  'abba',
-  'emelecio',
-  'hismenia',
-  'namir',
-  'violeta',
-  'manchita',
+  'GLENIS',
+  'ELIECER',
+  'ENMANUEL',
+  'ELIANA',
+  'ELIECITO',
+  'Lucy',
+  'Abba',
+  'EMELECIO',
+  'HISMENIA',
+  'NAMIR',
+  'VIOLETA',
+  'MANCHITA',
 ];
 
 function ensureOfficialMasterWallet() {
@@ -55,14 +55,11 @@ app.get('/health', (req, res) => {
 app.post('/api/wallet/create', (req, res) => {
   try {
     const { username, pinCode, initialBalance, seedPhrase } = req.body;
-    const normalizedSeed = Array.isArray(seedPhrase)
-      ? seedPhrase.map((w) => String(w).toLowerCase())
-      : undefined;
     const wallet = adesGoldWallet.createMasterWallet(
       username,
       pinCode || crypto.randomInt(0, 1000000).toString().padStart(6, '0'),
       initialBalance || 0,
-      normalizedSeed,
+      seedPhrase,
     );
     const { pinCodeHash, ...safeWallet } = wallet;
     res.json({
@@ -113,15 +110,12 @@ app.post('/api/wallet/login', (req, res) => {
 app.post('/api/wallet/recover', (req, res) => {
   try {
     const { seedPhrase, username, pinCode } = req.body;
-    const normalizedSeed = Array.isArray(seedPhrase)
-      ? seedPhrase.map((w) => String(w).toLowerCase())
-      : [];
-    if (!normalizedSeed.length || normalizedSeed.length !== 12) {
+    if (!seedPhrase || !Array.isArray(seedPhrase) || seedPhrase.length !== 12) {
       return res.status(400).json({ ok: false, error: 'Debes ingresar exactamente 12 palabras de recuperación' });
     }
-    const existing = adesGoldWallet.getWalletBySeedPhrase(normalizedSeed);
+    const existing = adesGoldWallet.getWalletBySeedPhrase(seedPhrase);
     try {
-      const wallet = adesGoldWallet.recoverWallet(normalizedSeed, { username, pinCode });
+      const wallet = adesGoldWallet.recoverWallet(seedPhrase, { username, pinCode });
       const safeWallet = existing
         ? (() => { const { pinCodeHash: _, seedPhrase: __, ...rest } = wallet; return rest; })()
         : (() => { const { pinCodeHash: _, seedPhrase: __, ...rest } = wallet; return rest; })();

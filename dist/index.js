@@ -149,10 +149,11 @@ class AdesGoldWallet {
         return null;
     }
     recoverWallet(seedPhrase, options) {
-        if (!this.validateSeedPhrase(seedPhrase)) {
+        const normalizedSeed = seedPhrase.map((w) => String(w).toLowerCase());
+        if (!this.validateSeedPhrase(normalizedSeed)) {
             throw new Error('Frase semilla inválida');
         }
-        const walletAddress = this.deriveAddress(seedPhrase);
+        const walletAddress = this.deriveAddress(normalizedSeed);
         let wallet = this.masterWallets.get(walletAddress);
         if (!wallet) {
             const cleanUsername = options?.username?.trim().toLowerCase() || `wallet_${walletAddress.slice(-6)}`;
@@ -167,7 +168,7 @@ class AdesGoldWallet {
             wallet = {
                 username: cleanUsername,
                 walletAddress,
-                seedPhrase,
+                seedPhrase: normalizedSeed,
                 pinCodeHash,
                 balance: allocation,
                 isActive: true,
