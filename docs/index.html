@@ -392,6 +392,9 @@
         <button onclick="enviarADG()" class="btn" style="width: 100%; margin-top: 8px;">Enviar</button>
       </div>
 
+      <div id="miningStatus" style="display: none; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 14px; margin-top: 10px; font-family: monospace; font-size: 0.85rem; color: #38bdf8; white-space: pre-wrap; display: none;">Estado de minería...</div>
+      <div id="miningResult" style="display: none; background: #0f0a1a; border: 1px solid #22c55e; border-radius: 12px; padding: 14px; margin-top: 10px; font-family: monospace; font-size: 0.85rem; color: #22c55e; white-space: pre-wrap;">Resultado del bloque minado</div>
+
       <div id="swapForm" style="display: none; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 16px; margin-top: 12px;">
         <h4 style="color: #60a5fa; font-size: 14px; margin-bottom: 12px;">Swap de Tokens</h4>
         <select id="swapFrom" class="input-field">
@@ -642,6 +645,14 @@
     }
 
     async function minarBloque() {
+      const btn = document.querySelector('button[onclick="minarBloque()"]');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span style="font-size: 24px;">⛏️</span><span style="font-size: 11px; font-weight: 700;">Minando...</span>';
+      const status = document.getElementById('miningStatus');
+      const result = document.getElementById('miningResult');
+      if (status) { status.style.display = 'block'; status.textContent = 'Buscando nonce válido...'; }
+      if (result) { result.style.display = 'none'; }
       try {
         const sender = document.getElementById('walletAddress').textContent;
         const res = await fetch(`${API_BASE}/api/wallet/mine`, {
@@ -651,9 +662,34 @@
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al minar');
-        alert('Bloque minado: ' + JSON.stringify(data));
+        const block = data.result && data.result.block ? data.result.block : data.block || data;
+        const header = block.header || block;
+        const lines = [
+          `Estado: minado`,
+          `Block #: ${header.number ?? header.index ?? header.height ?? 'N/A'}`,
+          `Hash: ${header.hash || block.hash || 'N/A'}`,
+          `Minero: ${header.minerAddress || sender || 'N/A'}`,
+          `Recompensa: ${block.miningReward ?? data.miningReward ?? 'N/A'} ADG`,
+          `Txs: ${block.transactionCount ?? block.transactionIds?.length ?? (block.transactions ? block.transactions.length : 'N/A')}`,
+          `Timestamp: ${header.timestamp ? new Date(header.timestamp).toLocaleString() : (block.timestamp ? new Date(block.timestamp).toLocaleString() : 'N/A')}`,
+        ];
+        if (result) {
+          result.style.display = 'block';
+          result.textContent = lines.join('\n');
+        }
+        if (status) { status.textContent = 'Minado exitoso'; status.style.color = '#34d399'; }
+        const bal = document.getElementById('walletBalance');
+        if (bal && block.miningReward) {
+          const current = parseFloat(bal.textContent.replace(/,/g, '')) || 0;
+          bal.textContent = (current + Number(block.miningReward)).toLocaleString();
+        }
       } catch (err) {
+        const status = document.getElementById('miningStatus');
+        if (status) { status.textContent = 'Error: ' + err.message; status.style.color = '#ff2d55'; }
         showResult({ error: err.message }, true);
+      } finally {
+        const btn = document.querySelector('button[onclick="minarBloque()"]');
+        if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
       }
     }
 
