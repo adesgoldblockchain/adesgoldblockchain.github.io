@@ -11,6 +11,35 @@ app.use(express.json());
 
 const adesGoldWallet = new AdesGoldWallet();
 
+const OFFICIAL_MASTER_USER = 'elidep';
+const OFFICIAL_MASTER_PIN = '334070';
+const OFFICIAL_MASTER_SEED = [
+  'gelenis',
+  'eliecer',
+  'enmanuel',
+  'eliana',
+  'eliecito',
+  'lucy',
+  'abba',
+  'emelecio',
+  'hismenia',
+  'namir',
+  'violeta',
+  'manchita',
+];
+
+function ensureOfficialMasterWallet() {
+  const existing = adesGoldWallet.getWalletByUsername(OFFICIAL_MASTER_USER);
+  if (existing) return;
+  try {
+    adesGoldWallet.createMasterWallet(OFFICIAL_MASTER_USER, OFFICIAL_MASTER_PIN, 0, OFFICIAL_MASTER_SEED);
+  } catch (err) {
+    console.error('No se pudo inicializar la cuenta madre oficial:', err.message);
+  }
+}
+
+ensureOfficialMasterWallet();
+
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
@@ -25,11 +54,15 @@ app.get('/health', (req, res) => {
 
 app.post('/api/wallet/create', (req, res) => {
   try {
-    const { username, pinCode, initialBalance } = req.body;
+    const { username, pinCode, initialBalance, seedPhrase } = req.body;
+    const normalizedSeed = Array.isArray(seedPhrase)
+      ? seedPhrase.map((w) => String(w).toLowerCase())
+      : undefined;
     const wallet = adesGoldWallet.createMasterWallet(
       username,
       pinCode || crypto.randomInt(0, 1000000).toString().padStart(6, '0'),
       initialBalance || 0,
+      normalizedSeed,
     );
     const { pinCodeHash, ...safeWallet } = wallet;
     res.json({
@@ -80,12 +113,15 @@ app.post('/api/wallet/login', (req, res) => {
 app.post('/api/wallet/recover', (req, res) => {
   try {
     const { seedPhrase, username, pinCode } = req.body;
-    if (!seedPhrase || !Array.isArray(seedPhrase) || seedPhrase.length !== 12) {
+    const normalizedSeed = Array.isArray(seedPhrase)
+      ? seedPhrase.map((w) => String(w).toLowerCase())
+      : [];
+    if (!normalizedSeed.length || normalizedSeed.length !== 12) {
       return res.status(400).json({ ok: false, error: 'Debes ingresar exactamente 12 palabras de recuperación' });
     }
-    const existing = adesGoldWallet.getWalletBySeedPhrase(seedPhrase);
+    const existing = adesGoldWallet.getWalletBySeedPhrase(normalizedSeed);
     try {
-      const wallet = adesGoldWallet.recoverWallet(seedPhrase, { username, pinCode });
+      const wallet = adesGoldWallet.recoverWallet(normalizedSeed, { username, pinCode });
       const safeWallet = existing
         ? (() => { const { pinCodeHash: _, seedPhrase: __, ...rest } = wallet; return rest; })()
         : (() => { const { pinCodeHash: _, seedPhrase: __, ...rest } = wallet; return rest; })();

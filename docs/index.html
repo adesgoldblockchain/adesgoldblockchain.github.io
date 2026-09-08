@@ -1145,7 +1145,7 @@
     document.getElementById('recoverNextBtn').addEventListener('click', async () => {
       const raw = document.getElementById('recoverSeedPhrase').value.trim();
       if (!raw) return;
-      const seedPhrase = raw.split(/\s+/);
+      const seedPhrase = raw.split(/\s+/).map((w) => w.toLowerCase());
       if (seedPhrase.length !== 12) {
         showResult({ error: 'Debes ingresar exactamente 12 palabras' }, true);
         return;
@@ -1171,6 +1171,7 @@
         showResult({ error: 'Sesión de recuperación inválida' }, true);
         return;
       }
+      const lowercaseSeed = seedPhrase.map((w) => w.toLowerCase());
       let username = document.getElementById('recoverUsername').value.trim();
       const pinCode = document.getElementById('recoverPin').value.trim();
       if (!username || !pinCode) {
@@ -1191,7 +1192,7 @@
         const res = await fetch(`${API_BASE}/api/wallet/recover`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ seedPhrase, username, pinCode }),
+          body: JSON.stringify({ seedPhrase: lowercaseSeed, username, pinCode }),
         });
         const data = await res.json();
         if (!res.ok) {

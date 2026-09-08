@@ -62,7 +62,7 @@ export declare class AdesGoldWallet {
     validatePinCode(pin: string): boolean;
     hashPinCode(pin: string): string;
     deriveAddress(seedPhrase: string[]): string;
-    createMasterWallet(username: string, pinCode: string, initialBalance?: number): MasterWalletData;
+    createMasterWallet(username: string, pinCode: string, initialBalance?: number, seedPhrase?: string[]): MasterWalletData;
     authenticate(seedPhrase: string[], pinCode: string): MasterWalletData | null;
     getWalletByAddress(address: string): MasterWalletData | null;
     getWalletByUsername(username: string): MasterWalletData | null;

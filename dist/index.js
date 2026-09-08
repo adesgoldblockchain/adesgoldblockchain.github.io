@@ -65,7 +65,7 @@ class AdesGoldWallet {
             .digest('hex');
         return `adg1${seed.slice(0, 20)}`;
     }
-    createMasterWallet(username, pinCode, initialBalance = 0) {
+    createMasterWallet(username, pinCode, initialBalance = 0, seedPhrase) {
         const cleanUsername = username.trim().toLowerCase();
         if (!cleanUsername || cleanUsername.length < 3 || cleanUsername.length > 20) {
             throw new Error('El nombre de usuario debe tener entre 3 y 20 caracteres');
@@ -76,8 +76,8 @@ class AdesGoldWallet {
         if (!this.validatePinCode(pinCode)) {
             throw new Error('El PIN debe ser un código numérico de 6 dígitos');
         }
-        const seedPhrase = this.generateSeedPhrase(12);
-        const walletAddress = this.deriveAddress(seedPhrase);
+        const finalSeedPhrase = seedPhrase && seedPhrase.length === 12 ? seedPhrase : this.generateSeedPhrase(12);
+        const walletAddress = this.deriveAddress(finalSeedPhrase);
         if (this.masterWallets.has(walletAddress)) {
             throw new Error('Esta wallet ya está registrada como cuenta madre');
         }
@@ -86,7 +86,7 @@ class AdesGoldWallet {
         const wallet = {
             username: cleanUsername,
             walletAddress,
-            seedPhrase,
+            seedPhrase: finalSeedPhrase,
             pinCodeHash,
             balance: allocation,
             isActive: true,
